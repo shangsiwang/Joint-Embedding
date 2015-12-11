@@ -1,11 +1,11 @@
-n<-100
-m<-10
-A<-list()
-for (i in 1:m){
-Ai<-matrix(runif(n^2,0,1),n,n)
-A[[i]]<-(Ai+t(Ai))/2
-}
-result<-multidembed(A,2)
+# n<-100
+# m<-10
+# A<-list()
+# for (i in 1:m){
+# Ai<-matrix(runif(n^2,0,1),n,n)
+# A[[i]]<-(Ai+t(Ai))/2
+# }
+# result<-multidembed(A,2)
 
 
 onedembed <- function(A,maxiter=20) {
