@@ -1,15 +1,12 @@
-#n<-1000
-#m<-100
-#A<-list()
-#for (i in 1:m){
-#Ai<-matrix(runif(n^2,0,1),n,n)
-#A[[i]]<-(Ai+t(Ai))/2
-#}
-#n 200 m 1000 sec 14.46
-#t1<-proc.time()
-#result<-multidembed(A,2)
-#t2<-proc.time()
-#t2-t1
+n<-100
+m<-10
+A<-list()
+for (i in 1:m){
+Ai<-matrix(runif(n^2,0,1),n,n)
+A[[i]]<-(Ai+t(Ai))/2
+}
+result<-multidembed(A,2)
+
 
 onedembed <- function(A,maxiter=20) {
 	##Innitialize
@@ -36,12 +33,12 @@ onedembed <- function(A,maxiter=20) {
 
 
 	iter<-0
-	while(iter<=maxiter & ((objpre-obj)>(10^-7)*(1+objstart))){
+	while(iter<maxiter & ((objpre-obj)>(10^-7)*(1+objstart))){
 		iter<-iter+1
 		##Iterate update
 		Gradiant<-matrix(0,n,1)
 		for(i in 1:m){
-			Gradiant<-Gradiant+(A[[i]]-lambda[i]*H)%*%h*lambda[i]*4
+			Gradiant<-Gradiant-A[[i]]%*%h*lambda[i]*4+h*lambda[i]^2*4
 		}
 		Gradiant<-Gradiant/m
 		Gnorm<-norm(Gradiant)
@@ -104,7 +101,7 @@ multidembed <- function(A,d,maxiter=20) {
 
 
 cptobj <- function(A,lambda,h) {
-	m<-length(m)
+	m<-length(A)
 	obj<-0
 	for(i in 1:m){
 		obj<-obj+norm(A[[i]]-lambda[i]*h%*%t(h),type="F")^2
