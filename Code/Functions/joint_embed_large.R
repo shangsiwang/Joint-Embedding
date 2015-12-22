@@ -21,7 +21,7 @@ if(is.null(hprevi)) {
 	d<-dim(hprevi)[2]
 	Aih<-matrix(0,n,1)
 	for(i in 1:d){
-		Aih<-lambdaprevi[i]* hprevi[,i] * ( t(hprevi[,i]) %*% h)
+		Aih<-Aih + lambdaprevi[i]* hprevi[,i] * ( t(hprevi[,i]) %*% h)
       }
 	Aih<-Ai%*%h-Aih
 	return(Aih)
@@ -41,6 +41,7 @@ onedembed <- function(A,maxiter=20,hprev=NULL,lambdaprev=NULL,innitialize=2) {
 
 	if(innitialize==1){
 	Abar<-matrix(0,n,n)
+	# You should use residual matrix.
 	for(i in 1:m){
 		Abar<-Abar+A[[i]]
 	}
