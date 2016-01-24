@@ -1,11 +1,13 @@
-# n<-100
+# n<-1000
 # m<-10
 # A<-list()
 # for (i in 1:m){
 # Ai<-matrix(runif(n^2,0,1),n,n)
 # A[[i]]<-(Ai+t(Ai))/2
 # }
-# result<-multidembed(A,2)
+# result1<-multidembed(A,3,50)
+# result2<-multidembed(A,d=3,maxiter=50,innitialize=3)
+
 
 
 onedembed <- function(A,maxiter=20) {
@@ -85,7 +87,7 @@ multidembed <- function(A,d,maxiter=20) {
 	result<-list("objective" =rep(0,d),"lambda" =matrix(0,m,d),"h" =matrix(0,n,d),"iter"=rep(0,d))
 	Resid<-A
 	for(k in 1:d){
-		resultd<-onedembed(Resid)
+		resultd<-onedembed(Resid,maxiter)
 		result$objective[k]=resultd$objective
 		result$iter[k]=resultd$iter
 		result$lambda[,k]=resultd$lambda

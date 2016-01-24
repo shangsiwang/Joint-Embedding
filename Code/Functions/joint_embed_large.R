@@ -30,10 +30,7 @@ if(is.null(hprevi)) {
 
 
 
-
-
-
-onedembed <- function(A,maxiter=20,hprev=NULL,lambdaprev=NULL,innitialize=2) {
+onedembed <- function(A,maxiter=20,hprev=NULL,lambdaprev=NULL,innitialize=3) {
 	##Innitialize
 	m<-length(A)
 	n<-dim(A[[1]])[1]
@@ -41,16 +38,27 @@ onedembed <- function(A,maxiter=20,hprev=NULL,lambdaprev=NULL,innitialize=2) {
 
 	if(innitialize==1){
 	Abar<-matrix(0,n,n)
+	if(is.null(hprev)){
 	for(i in 1:m){
 		Abar<-Abar+A[[i]]
 	}
 	s<-svd(Abar,1,1)
 	h<-s$u
+	} else {
+	  ###should perform svd on residual matrix
+	  h<-matrix(rnorm(n),n,1)+1
+	}
 	}	else if(innitialize==2) {
+	  if(is.null(hprev)){
 	s<-svd(A[[1]],1,1)
 	h<-s$u
+	  } else {
+	    ###should perform svd on residual matrix
+	    s<-svd(A[[1]],2,2)
+	    h<-matrix(s$u[,2],n,1)
+	  }
 	} else if(innitialize==3) {
-	  h<-matrix(rnorm(n),n,1)
+	  h<-matrix(rnorm(n),n,1)+1
 	}
 	
 	h<-h/norm(h,type="F")
@@ -110,16 +118,16 @@ onedembed <- function(A,maxiter=20,hprev=NULL,lambdaprev=NULL,innitialize=2) {
 
 
 
-multidembed <- function(A,d,maxiter=20,innitialize=2) {
+multidembed <- function(A,d,maxiter=20,innitialize=3) {
 	m<-length(A)
 	n<-dim(A[[1]])[1]
 	result<-list("objective" =rep(0,d),"lambda" =matrix(0,m,d),"h" =matrix(0,n,d),"iter"=rep(0,d))
 	Resid<-A
 	for(k in 1:d){
 	  if(k==1){
-		resultd<-onedembed(A,maxiter=20,hprev=NULL,lambdaprev=NULL,innitialize=innitialize)
+		resultd<-onedembed(A,maxiter=maxiter,hprev=NULL,lambdaprev=NULL,innitialize=innitialize)
 	  } else {
-	  resultd<-onedembed(A,maxiter=20,as.matrix(result$h[,1:(k-1)]),as.matrix(result$lambda[,1:(k-1)]),innitialize)
+	  resultd<-onedembed(A,maxiter=maxiter,as.matrix(result$h[,1:(k-1)]),as.matrix(result$lambda[,1:(k-1)]),innitialize)
 	  }
 		result$objective[k]=resultd$objective
 		result$iter[k]=resultd$iter
@@ -157,7 +165,6 @@ cptobjprev <- function(A,lambda,h,hprev=NULL,lambdaprev=NULL) {
     }
     }
     }
-  
   return(obj)
 }
 
