@@ -1,7 +1,7 @@
 \documentclass[a4paper]{article}
 
 \usepackage[english]{babel}
-\usepackage[utf8x]{inputenc}
+\usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{graphicx}
@@ -9,7 +9,7 @@
 
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-
+\usepackage{verbatim}
 
 
 \newtheorem{theorem}{Theorem}[section]
@@ -44,105 +44,143 @@
 \begin{document}
 \maketitle
 
-\begin{abstract}
-In this paper, we propose an algorithm to jointly embed multiple graphs into lower dimensional space. The graphs represented in lower dimensional space can be classified or clustered easily with various standard algorithms. We demonstrate through simulation studies that our embedding algortihm leads to the best classification performance compared to the other existing embedding approaches. 
-\end{abstract}
 
-\section{Introduction}
 
-In many problems arising in science, graphs naturally appears as data to model complex relationship between objects. The graphs are high dimensional object with comlicated topological structure which makes graphs classification and clustering a challenge to traditional machine learning algorithms. In this paper, we propose an algorithm to jointly embed multiple graphs into lower dimensional space. The graphs represented in lower dimensional space then can be classified or clustered easily with various standard learning algorithms. We demonstrate through simulation studies that our graph embedding algortihm leads to the best classification performance compared to the other existing embedding approaches. 
 
-\section{Setting}
 
-The joint embedding algorithm consumes a set of vertex mathced graphs. Although the algorithm works on weighted and directed graphs, we will focus on simple, unweighted and undirected graphs for simplicity. Let $\{G_i \} _{i=1}^{n}$ be $n$ m-vertex graphs. We require the vertices in these graphs are matched which is all the graphs have the common vertex set $V$ : $G_i=(V,E_i)$. The joint embedding algorithm tries to embed of all $G_i$s simultaneously to $\mathbb{R}^d$. Before we introduce the joint embedding algorithm, we first introduce two random graph models which provide basis for statistical analysis and are also used to generate simulation data.
+\section{Theory}
+Consider a 1-dimensional Multiple Random Eigen Graph model, that is 
+\[P_i=\lambda_i h_1 h_1 ^T\]
+where $\lambda_i$ follows an unknown distribution $\mathbb{F}$. In this paper, we consider the task of estimating $h_1$, and let
+\[ \rho(A_i,h)= ||A_i- \langle A_i,h h^T \rangle h h^T||_F^2 \]
+\[ D_m(h,h_1) =\frac{1}{m}\sum_{i=1}^{m} \rho(A_i,h) \]
+\[ D(h,h_1) = E(\rho(A_i,h)) \]
+Assume, 
+\begin{equation} 
+\hat{h}_1^m= \underset{||h|| =1}{\operatorname{argmin}}   D_m(h,h_1)
+\end{equation}
+This is an alternative formulation of 1-dimensional joint embedding of graphs. If we define,
+\[(\hat{\Lambda},\hat{h}_1^m) = \underset{\Lambda,||h_1||=1}{\operatorname{argmin}} \sum\limits_{i=1}^{m} \| A_i-  \Lambda_{i} h_1 h_1^T \|  ^2 \]
+Then, $\hat{h}_1^m$ in both problems will be the same and $\hat{\Lambda}_{i}=\langle A_i,\hat{h}_1^m \hat{h}_1^{mT} \rangle$. We consider the formulation of equation 1. 
 
-\begin{definition} (Stochasitic Block Model (SBM)) Let $\pi$ be prior probability for block membership. Denote $\tau=(\tau_1,\tau_2,...,\tau_m) \sim \in [K]^m$ be a block membership vector of vertices which follows multinomial distribution with probability $\pi$. $B \in [0,1]^{K \times K}$ is the block edge probability matrix. Suppose $A$ is a random adjacency matrix given by,
-\[ P(A|\tau,B)= \prod_{i<j} B_{\tau_i,\tau_j}^{A_{i,j}} (1-B_{\tau_i,\tau_j})^{(1-A_{i,j})}\] 
-Then we say $A$ is an adjacency matrix of a K-block stochastic block model graph.
-\end{definition}
+\begin{theorem}
+If $D(h,h_1)$ has a unique global minimum at $h'$, then $\hat{h}_1^m$ converges almost surely to $h'$ as $m$ goes to infinity, that is 
+\[ \hat{h}_1^m \overset{a.s.}{\rightarrow} h' \]
+\end{theorem}
+\begin{proof}
+The first part of proof is showing that $|D_n(h,h_1)-D(h,h_1)|$ converges uniformly to $0$, that is \[\underset{h}{\sup}|D_m(h,h_1)-D(h,h_1)|\overset{a.s.}{\rightarrow} 0\]
+Clearly, by strong law of large numbers $D_m(h,h_1) \overset{a.s.}{\rightarrow} D(h,h_1)$ for all $h$. To establish uniform convergence, we will use a stochastic version of Arzelà–Ascoli theorem. In particular, we need to show that for almost all sample sequences $\{D_m(h,h_1)\}_{m=1}^\infty$ is equicontinuous, that is there exists a set $M \subset \Omega$ where $P(M)=1$, fix an $\epsilon > 0$, $\exists \delta, \forall \omega \in M, \exists m(\omega)$
+\[ \underset{||s-t||<\delta}{\sup} |D_m(s,h_1,\omega)-D_m(t,h_1,\omega)| \leq \epsilon \]
+for all $m>m(\omega)$. The condition is hard to verify in general; however, we could take advantage of the fact that there is only a finite number possibilities for each adjacency matrix. For an adjacency matrix $A \in \{0,1\}^{n \times n}$, $\rho(A,h)$ is a continuous function in $h$ which lies in a compact set; therefore, there exists $\delta(A)$ such that
+\[\underset{\|s-t\|<\delta(A)}{\sup}|\rho(A,s) - \rho(A,t)| \leq \epsilon\]
+Let $\delta=\underset{A}{\inf} \delta(A)$, then 
+\begin{align*}
+|D_m(s,h_1,\omega)-D_m(t,h_1,\omega)| &=|\frac{1}{m}\sum_{i=1}^{m} \rho(A_i,s)-\frac{1}{m}\sum_{i=1}^{m} \rho(A_i,t)| \\
+&\leq \frac{1}{m} \sum_{i=1}^{m} |\rho(A_i,s)-\rho(A_i,t)| \\
+&\leq \epsilon
+\end{align*}
+This shows $\{D_m(h,h_1)\}_{m=1}^\infty$ is equicontinuous on $\Omega$.  Together with the fact that parameter space is compact and $D_m(h,h_1)$ converges almost surely to  $D(h,h_1)$, we incur Arzela-Ascoli Theorem and claim that 
+\[\underset{h}{\sup}|D_m(h,h_1)-D(h,h_1)|\overset{a.s.}{\rightarrow} 0\]
+To prove the claim of theorem, we use a slightly modified version of proof for theorem 5.2.1 in Bickel and Doksum. By definition, we have $D_m(\hat{h}_1^m,h)  \leq D_m(h',h)$ and $D(h',h) \leq D(\hat{h}_1^m,h)$. Using these two inequalities we have
+\[D_m(h',h)-D(h',h) \geq D_m(\hat{h}_1^m,h)-D(h',h) \geq D_m(\hat{h}_1^m,h)-D(\hat{h}_1^m,h) \]
+Therefore, 
+\[ |D_m(\hat{h}_1^m,h)-D(h',h)| \leq \max(|D_m(h',h)-D(h',h)|,|D_m(\hat{h}_1^m,h)-D(\hat{h}_1^m,h)|) \]
+This implies 
+\[ |D_m(\hat{h}_1^m,h)-D(h',h)| \leq \underset{h}{\sup}|D_m(h,h_1)-D(h,h_1)| \]
+Hence, $|D_m(\hat{h}_1^m,h)-D(h',h)|$ must converge almost surely to $0$. If $\hat{h}_1^m$ does not converge almost surely $h'$, $||\hat{h}_1^m-h'||\geq \epsilon$ for some $\epsilon$ and infinitely many $m$s. Since $h'$ is the unique global minimum, $|D(\hat{h}_1^m,h)-D(h',h)| > \epsilon' $ for infinitely many $m$s. This contradicts the fact that 
+\[|D(\hat{h}_1^m,h)-D(h',h)| \leq |D_m(\hat{h}_1^m,h)-D(h',h)| + |D_m(\hat{h}_1^m,h)-D(\hat{h}_1^m,h)| \rightarrow 0\] 
+This concludes that $\hat{h}_1^m$ converges almost surely $h'$.
 
-\begin{definition} (Random Dot Product Graph (RDPG)) Let $X=[X_1^T, X_2^T,..., X_m^T] \in \mathbb{R}^{n \times d}$ be the latent positions for vertices. Suppose A is a random adjacency matrix given by,
-\[ P(A|X)= \prod_{i<j} X_i^T X_j ^{A_{i,j}} (1-X_i^T X_j)^{(1-A_{i,j})}\]
-Then we say that A is the adjacency matrix of a random dot product graph with latent position X
-of rank d.
-\end{definition}
+\end{proof}
 
-\section{Methodology}
 
-The joint embedding algorithm operates on the adjacency matrices of graphs. It tries to express all adjacency matrices as linear combinations of rank one symmetric matrices.   
 
-\begin{definition} (Joint Embedding) Given n graphs $\{G_i \} _{i=1}^{n}$. Let $A_i$ be the associated adjacency matrix of $G_i$. The d-dimensional joint embeddings of graphs $\{G_i \} _{i=1}^{n}$ are represented by $\lambda \in R_{n \times d}$ and $H \in R _{m \times d}$ and they are given by,
-\[ (\lambda,H) = \arg\min_{\lambda,H} \sum\limits_{i=1}^{n} \| A_i- \sum\limits_{k=1}^{d} \lambda_{ik} h_k h_k^T \| _F ^2 \] 
-$\| \cdot \|_F$ denote the Frobenious norm and $h_k$ is the kth column of $H$.
-\end{definition}
 
-\noindent Here, $h_k h_k^T$ can be understood as the basis of graphs, and each graph $G_i$ is represented as a linear combination of basis with loadings $\lambda_{i*}$. The joint embeddings of $(\lambda,H)$ can be recovered by solving the optimization problem. At the first glance, we could try to minimize the objective through gradiant descent on $\lambda$ and $H$. The problem is that the optimization problem is not convex in $H$. Therefore, if we cannot innitialize $H$ carefullt, we will very likely end up in a bad local minimum. This problem can be mitigated a little by perform gradiant descent algorithm several times with random innitialization. We propose a greedy algorithm which solves the optimization problem dimension by dimension. Specifically at iteration $k_0$, we find $k_0$th basis and loadings $\lambda_{k_0}$ by treating all previous dimensions fixed that is,
 
-\[ (\lambda_{k_0},h_{k_0}) = \arg\min_{\lambda_{k_0},h_{k_0}} \sum\limits_{i=1}^{n} \| A_i- \sum\limits_{k=1}^{k_0-1} \lambda_{ik} h_k h_k^T -\lambda_{ik_0} h_{k_0} h_{k_0}^T\| _F ^2 \]  
+\begin{theorem}
+Consider a 1-dimensional MREG, that is $P_i=\lambda_i h_1 h_1 ^T$ with $h_1$ being norm 1 and $\lambda_i \sim F$. If $h'$ is the global minimizer of $D(h,h_1)$, then 
+\[||h'-h_1|| \leq \frac{2 E(\lambda_i)}{E(\lambda_i^2)(h_1^T h')^2} \]
+\end{theorem}
+\begin{proof}
+The first part of proof is showing that $h'$ is the eigenvector corresponds to the largest eigenvalue of $E(\langle A_{i},h' h'^T \rangle A_{i})$. Then, we show $E(\langle A_{i},h' h'^T \rangle A_{i})$ is close to a properly scaled $E(P_i)$. To conclude, we apply Davis-Kahan theorem to the top eigenvector of both matrices and get the desired result. First, we notice that
+\begin{align*}
+\underset{||h|| =1}{\operatorname{min}}D(h,h_1) &=\underset{||h|| =1}{\operatorname{min}}E(\|A_i- \langle A_i,h h^T \rangle h h^T\|^2) \\
+&=\underset{||h|| =1}{\operatorname{min}}E(\langle A_i,A_i \rangle- \langle A_i,h h^T \rangle ^2) \\
+&=E(\langle A_i,A_i \rangle)-\underset{||h|| =1}{\operatorname{max}}E( \langle A_i,h h^T \rangle ^2)
+\end{align*}
+Therefore, 
+\[h'= \underset{||h|| =1}{\operatorname{argmin}}D(h,h_1)=\underset{||h|| =1}{\operatorname{argmax}} E(\langle A_i,h h^T \rangle ^2) \]
+Taking the derivative of $E( \langle A_i,h h^T \rangle ^2)+ c(h^Th-1)$ with respect to $h$, we have 
+\begin{align*}
+\frac{\partial E( \langle A_i,h h^T \rangle ^2)+ c(h^Th-1) }{\partial h} & =  E(\frac{\partial  \langle A_i,h h^T \rangle ^2}{\partial h}) +2ch \\
+&=E( \langle A_i,h h^T \rangle A_i)h +2ch 
+\end{align*}
+Set it to $0$,
+\begin{align*} 
+E( \langle A_i,h' h'^T \rangle A_i)h' & = -2ch' \\
+&= (h'^T E( \langle A_i,h' h'^T \rangle A_i)h') h' \\
+&= E( \langle A_i,h' h'^T \rangle ^ 2) h'
+\end{align*}
+It implies $h'$ is an eigenvector of $E(\langle A_{i},h' h'^T \rangle A_{i})$ and the corresponding eigenvalue is $E(\langle A_{i},h' h'^T \rangle ^2)$. Furthermore, $E(\langle A_{i},h' h'^T \rangle ^2)$ must be the eigenvalue with the largest magnitude. Assume not, then there exists a $h''$ with norm 1 such that
+\[ | h''^T E(\langle A_{i},h' h'^T \rangle A_{i}) h''| = |E(\langle A_{i},h' h'^T \rangle \langle A_{i},h'' h''^T \rangle)| > E(\langle A_{i},h' h'^T \rangle ^2)  \]
+However, by Cauchy-Schwarz inequality we must have
+\[ E(\langle A_{i},h'' h''^T \rangle^2)  E(\langle A_{i},h' h'^T \rangle^2) > |E(\langle A_{i},h' h'^T \rangle \langle A_{i},h'' h''^T \rangle)|^2 \]
+This implies $E(\langle A_{i},h'' h''^T \rangle^2) \geq E(\langle A_{i},h' h'^T \rangle^2)$ which contradicts the definition of $h'$. This concludes that $h'$ is the eigenvector corresponds to the largest eigenvalue of $E(\langle A_{i},h' h'^T \rangle A_{i})$. \\
 
-\noindent In general, to compute d dimensional embeddings $\lambda$ and $H$, we recursively solve the one dimensional problem above. To solve the one dimensional problem, we take a gradient descent approach which iteratively update $\lambda_{k_0}$ and $h_{k_0}$. If we denote the objective function on the right hand side as $f(\lambda_{k_0},h_{k_0})$ and the redidual matrix $R_{ik_0}=A_i- \sum\limits_{k=1}^{k_0-1} \lambda_{ik} h_k h_k^T$. The gradiant of the objective with repect to $h_{k_0}$ are given by,
-\[ \frac{\partial f}{\partial h_{k_0}} = \sum\limits_{i=1}^{n} 4(R_{ik}-\lambda_{ik_0} h_{k_0} h_{k_0}^T) h_{k_0}\]
-When updating $\lambda_{k_0}$, we can just regress $R_{ik_0}$ on $h_{k_0} h_{k_0}$. It yields,
-\[  \arg\min_{\lambda_{k_0}}f(\lambda_{k_0},h_{k_0})= \frac{<h_{k_0} h_{k_0}^T,R_{ik}>}{\|h_{k_0} h_{k_0}^T \|_F^{2}} \]
-Algorithm 1 describes framework to find joint embeddings of graphs. 
+\noindent Next, we compute $E(\langle A_{i},h' h'^T \rangle A_{i})$.
+\begin{align*}
+E(\langle A_{i},h' h'^T \rangle A_{i}|P_i) 
+&=   E( \langle A_{i}-P_i,h' h'^T \rangle (A_{i}-P_i)|P_i)+E(\langle A_{i}-P_i,h' h'^T \rangle P_i|P_i) \\
+&\qquad {} +E(\langle P_i,h' h'^T \rangle (A_{i}-P_i|P_i)+E(\langle P_i,h' h'^T \rangle P_i|P_i) \\
+&= E(\langle A_{i}-P_i,h' h'^T \rangle (A_{i}-P_i)|P_i) + \lambda_i (h_1^Th')^2 P_i \\
+&=  2h' h'^T *P_i*(J-P_i) - DIAG(h_1 h_1^T *P_i*(J-P_i))  +\lambda_i (h_1^Th')^2 P_i \\
+&=  2 h' h'^T *P_i*(J-P_i) - DIAG(h' h'^T*P_i*(J-P_i))  + \lambda_i (h_1^Th')^2 P_i
+\end{align*}
+Here, DIAG() means only keep the diagonal of matrix, $*$ means the hadmard product and $J$ is a matrix of all ones. Using the fact that $P_i=\lambda_i h_1 h_1 ^T$, we have 
+\begin{align*}
+E(E(\langle A_{i},h' h'^T \rangle A_{i}|P_i)-\lambda_i (h_1^Th')^2 P_i) 
+&= E(\langle A_{i},h' h'^T \rangle A_{i}) - E(\lambda_i^2) (h_1^Th')^2 h_1 h_1^T \\
+&= E(2 h' h'^T *P_i*(J-P_i) - DIAG(h' h'^T*P_i*(J-P_i)))
+\end{align*}
+If we consider the norm difference between $E( \langle A_{i},h' h'^T \rangle A_{i})$ and $ E(\lambda_i^2) (h_1^Th')^2 h_1 h_1^T$, we have
+\begin{align*}
+||E(\langle A_{i},h' h'^T \rangle A_{i} ) - E(\lambda_i^2) (h_1^Th')^2 h_1 h_1^T||
+&= ||E(2 h' h'^T *P_i*(J-P_i) - DIAG(h' h'^T*P_i*(J-P_i)))|| \\
+&\leq  E(||2 h' h'^T *P_i*(J-P_i) - DIAG(h' h'^T*P_i*(J-P_i))||) \\
+&\leq  E(||2 h' h'^T *P_i*(J-P_i)||) \\
+&\leq  E(||2 h' h'^T * P_i||) \\
+&\leq  2 E(\lambda_i)|| h' h'^T * h_1 h_1^T|| \\
+&=  2 E(\lambda_i) 
+\end{align*}
+Notice that the only non-zero eigenvector of $E(\lambda_i^2) (h_1^Th')^2 h_1 h_1^T$ is $h_1$ and the corresponding eigenvalue is $E(\lambda_i^2) (h_1^Th')^2$. Applying Davis-Kahan theorem to eigenvector corresponding to the largest eigenvalue of matrices $E(\langle A_{i},h' h'^T \rangle A_{i} )$ and $E(\lambda_i^2) (h_1^Th')^2 h_1 h_1^T$, we conclude
+\[||h'-h_1|| \leq \frac{2 E(\lambda_i)}{E(\lambda_i^2)(h_1^T h')^2} \]
+\end{proof}
+\begin{remark}
+In proof of theorem 1, we require $h'$ to be the unique global minimizer of $D(h,h_1)$ or global maximizer $E(\langle A_i,h h^T \rangle ^2)$ subject to being norm $1$. However, the global optimizer is definitely not unique due to symmetry in the sign of $h$, that is $D(h,h_1)=D(-h,h_1)$ for any $h$. This problem can be fixed by forcing an orientation of $\hat{h}_1^m$ or stating that the convergence is up to a sign flip. It is also possible that there are multiple global minimizers of $D(h,h_1)$ which are not sign flip of each other. In this case, theorem 1 will not apply. We are only certain that when all graphs are from Erdos-Renyi random graph model, the global minimizer is unique up to a sign flip.
+\end{remark}
 
-\begin{algorithm}
-\caption{Joint Embedding Algorithm}
-%\label{CHalgorithm}
-\begin{algorithmic}[1]
-\Procedure{Find joint embeddings $\lambda,H$ of $\{A_i\}_{i=1}^n$}{}
-\State Set residuals: $R_{i1}=A_i$
-\For{$k=1:d$ }
-\State Innitialize $h_k$ and $\lambda_k$ 
-\While{not convergent}
-\State Compute objective $\sum\limits_{i=1}^{n} \| R_{ik}-  \lambda_{ik} h_k*h_k^T \| _F ^2$
-\State Fixing $h_k$, update $\lambda_k$ by regression
-\State Fixing $\lambda_k$, update $h_k$ through gradient descent
-\EndWhile
-\State Update residuals: $R_{i(k+1)}=R_{ik}- \lambda_{ik} h_k*h_k^T$
-\EndFor
-\State Output $\lambda=[\lambda_1,\lambda_2,...,\lambda_d]$ and $H=[h_1,h_2,...,h_d]$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+\begin{remark}
+To see an application of theorem 2, we consider Erdos-Renyi graphs with $100$ vertices and edge probability $0.5$. Under this setting, theorem 2 implies  $||h'-h_1|| \in [0,0.04] \cup [1.28,1.52]$. The second interval is disturbing. It is due to the fact that when $h_1^T h'$ is small the bound is useless. We provide some insights why the second interval is there and how we can get rid of it with more assumptions. If we take a closer look on $E(\langle A_i,h h^T \rangle ^2)$,
+\begin{align*}
+E(\langle A_i,h h^T \rangle ^2) &= E(\langle P_i,h h^T \rangle ^2)+2E(\langle P_i,h h^T \rangle \langle A_i-P_i,h h^T \rangle)+E(\langle A_i-P_i,h h^T \rangle ^2) \\
+&=E(\langle P_i,h h^T \rangle ^2)+E(\langle A_i-P_i,h h^T \rangle ^2) \\
+&=E(\lambda_i^2)(h_1^T h)^4+E((h^T (A_i-P_i)h) ^2)
+\end{align*}
+Therefore, 
+\[h'= \underset{||h|| =1}{\operatorname{argmax}} E(\lambda_i^2)(h_1^T h)^4+E((h^T (A_i-P_i)h) ^2) \]
+We see $E(\lambda_i^2)(h_1^T h)^4$ is clearly maximized when $h=h_1$; however, the noise term $E((h^T (A_i-P_i)h) ^2)$ is generally not maximized at $h=h_1$. If we assume $n$ is large, we can apply concentration inequality to $(h^T (A_i-P_i)h) ^2$ and have an upper bound on $E((h^T (A_i-P_i)h) ^2)$. If we further assume $A_i$ is not too sparse, that is $E(\lambda_i^2)$ grows with $n$ fast enough, then the sum of these two terms are dominated by the first term. This provides a way to have a lower bound on $h_1^T h'$. We may then remove the second interval. In general, if $n$ is small, the noise term may cause $h'$ differs with $h_1$ by a significant amount. We focus on the case that $n$ is fixed in this paper. The case that $n$ goes to infinity is considered in papers ***.
+\end{remark}
 
-\noindent The basic idea of the algorthm is to recursively find the best rank 1 approximation to the residual. It is similar to the least angle regression algorithm. The difference between least angle regression and joint embedding is that joint embedding need also compute its predictors $h_k*h_k^T$. In the case of only one graph, the joint embedding is equivalent to adjacency spectral embedding algorithm (ASE). The basic joint embedding algorithm above can be modified to accomodate several settings. \\
-\textbf{Variation 1.} When we are confident all graphs comes from the same model, we can force all $\lambda_{ik}$s to be equal across graphs. This is useful when primary inference task is to learn embeddings of vertices. Since all graphs share the same loadings, we only need $\lambda \in \mathbb{R}^d$ and the optimization problem becomes,
-\[ (\lambda,H) = \arg\min_{\lambda,H} \sum\limits_{i=1}^{n} \| A_i- \sum\limits_{k=1}^{d} \lambda_{k} h_k h_k^T \| _F ^2 \] 
-In this case, the optimization problem can be solved exactly by singular value decomposition of the average matrix of pointwise square of $A_i$. \\
-\textbf{Variation 2.} When we have a label $Y_i \in \mathbb{Y}$ associated with graph $G_i$, we may require all $\lambda_{ik}$s to be equal within class. That is $\lambda_{ik}=\lambda_{yk}$ for all $i$ with $Y_i=y$. If we let $\lambda \in \mathbb{R}^{|\mathbb{Y}|,d}$, the optimization problem becomes,
-\[ (\lambda,H) = \arg\min_{\lambda,H} \sum\limits_{i=1}^{n} \| A_i- \sum\limits_{k=1}^{d} \lambda_{Y_ik} h_k h_k^T \| _F ^2 \] 
-In this case, when updating $\lambda$ algorithm 1 should to regress all $R_{ik}$ from the same class simultaneously. \\
-\textbf{Variation 3.} We may require all $\lambda_{ik}$s to be greater than $0$ like in the non-negative matrix fatorization. The advantage of this constrain is that we may automatically cluster graph $G_i$ based on largest $\lambda_{ik}$. 
-\[ (\lambda,H) = \arg\min_{\lambda \geq 0,H} \sum\limits_{i=1}^{n} \| A_i- \sum\limits_{k=1}^{d} \lambda_{ik} h_k h_k^T \| _F ^2 \] 
-To solve this problem, the algorithm can be modified to apply iterative shrinkage thresholding on $\lambda$. \\
 
-\section{An Simple Experiment}
-In this section, we consider two simple experiments which demonstrates joint embedding can effectively embed graphs. In particular, we will look into performance of classification using embeddings of graphs.
+\begin{remark}
+The two theorems above only concern the estimation of $h_1$, but not $\lambda_i$. To estimate $\lambda_i$, we have
+\[\hat{\lambda}_i^m= \langle A_i,\hat{h}_1^m \hat{h}_1^{m T} \rangle \]If $n$ is fixed, it is impossible to prove any consistency result on estimation of $\lambda_i$ due to the fact we only observe one finite graph $A_i$ associated with $\lambda_i$. When $m$ goes to infinity, we can apply theorem 1
+\[\hat{\lambda}_i^m \rightarrow \langle A_i,h' h'^T \rangle = h'^T A_i h'\]
+Then applying theorem 2 and utilizing the fact that $h^T A_i h$ is continuous in $h$, we may have a upper bound on $|\hat{\lambda}_i^m - h_1^T A_i h_1|$. In general, $h_1^T A_i h_1$ is concentrated about $\lambda_i$ with high probability.
+\end{remark}
 
-\subsection{Experiment 1}
- In this experiment, we randomly independently generate $100$ 100-vertex graphs from two stochastic block models. Specifically,
- \[ \{G_i\}_{i=1}^{100} \sim  SBM([0.5, 0.5],\begin{bmatrix} 0.5 & 0.2 \\ 0.2 & 0.5 \\ \end{bmatrix}) \text{ , and } \]
-  \[ \{G_i\}_{i=101}^{200} \sim  SBM([0.5, 0.5],\begin{bmatrix} 0.6 & 0.2 \\ 0.2 & 0.5 \\ \end{bmatrix})\]
-  The $200$ graphs are jointly embedded into 2 dimensonal Euclidean space. The $\lambda$ is as shown in the figure 1. By computing pairwise distances of $\lambda$ and fitting a 3-NN classifier, the classification accuracy is 1.
-\begin{figure}[p]
-    \centering
-    \includegraphics[scale=0.8]{exp1.png}
-    \caption{Loadings of Graphs}
-    %\label{fig:awesome_image}
-\end{figure}
 
-\subsection{Experiment 2}
- In this experiment, we randomly independently generate $200$ 100-vertex graphs from random dot product graph models. Specifically,
- \[ \{G_i\}_{i=1}^{100} \sim  RDPG(X_i) \text{ , here } X_i \sim Dirchlet([1,1]/c) \text{ , and } \]
- \[ \{G_i\}_{i=101}^{200} \sim  RDPG(X_i) \text{ , here } X_i \sim Dirchlet([1,2]/c) \]
-  Here, c is a concentration parameter which controls how much latent positons $X_i$ are concentrated around its mode. The $200$ graphs are then jointly embedded into 2 dimensonal Euclidean space. We compare joint embedding to two other embedding approaches. The first one is adjacency spectral embedding with procrust distance; the second one is Omni-embedding with Euclidean distance. Again, we use a k-NN  classifier to compute classification accuracy. In addition, reliability of resulting embeddings is reported. Figure 2 shows the results. We can see from the result that joint embedding is clearly the best. 
-\begin{figure}[p]
-    \centering
-    \includegraphics[scale=0.8]{exp2.png}
-    \caption{Classification Accracy of Embeddings}
-    %\label{fig:awesome_image}
-\end{figure}
+
 
 
 \end{document}

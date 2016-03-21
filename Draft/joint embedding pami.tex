@@ -127,7 +127,7 @@ For identifiability issue, we also require columns of $H$ to be norm 1. When the
 \noindent Instead of performing gradient descent on all columns $H$ simultaneously, we consider a greedy algorithm which solves the optimization problem dimension by dimension. Specifically at iteration $k_0$, we fix all estimates of previous dimensions. Objective function is then minimized the  by searching $h_{k_0}$ and $k_0$th column of $\Lambda$, that is
 
 \begin{align*}(\hat{h}_{k_0},\hat{\Lambda}_{k_0}) &= \\
-&\underset{\Lambda_{k_0},||h_{k_0}||=1}{\operatorname{argmin}} \sum\limits_{i=1}^{m} \| A_i- \sum\limits_{k=1}^{k_0-1} \hat{\Lambda}_{ik} \hat{h}_{k} \hat{h}_{k}^T -\lambda_{ik_0} h_{k_0} h_{k_0}^T\|  ^2
+&\underset{\Lambda_{k_0},||h_{k_0}||=1}{\operatorname{argmin}} \sum\limits_{i=1}^{m} \| A_i- \sum\limits_{k=1}^{k_0-1} \hat{\Lambda}_{ik} \hat{h}_{k} \hat{h}_{k}^T -\Lambda_{ik_0} h_{k_0} h_{k_0}^T\|  ^2
 \end{align*} 
 
 \noindent Again, we use $\Lambda_{k_0}$ to denote $k_0$th column of matrix $\Lambda$, and we will denote the function on the left hand side of the equation by $f(\Lambda_{k_0},h_{k_0})$. In general, to compute d-dimensional embeddings $(\hat{\Lambda},\hat{H})$, we recursively solve the one dimensional optimization problem above by letting $k_0$ to increase from 1 to d. \\
@@ -142,7 +142,6 @@ Algorithm 1 describes the general procedure to compute joint embeddings of graph
 
 \begin{algorithm}
 	\caption{Joint Embedding Algorithm}
-	%\label{CHalgorithm}
 	\begin{algorithmic}[1]
 		\Procedure{Find joint embeddings $\hat{\Lambda},\hat{H}$ of $\{A_i\}_{i=1}^m$}{}
 		\State Set residuals: $R_{i1}=A_i$
@@ -200,17 +199,15 @@ Before going into details of experiments, we want to discuss about how to select
 
 \noindent From the plot, we can see that  $||\hat{h}_1^m-\hat{h}_1^{\frac{m}{2}}||$ converges to $0$ as $m$ increases. It suggests the convergence of $\hat{h}_1^m$. Secondly, we should notice that the bias $||\hat{h}^m_1-h_1||$ does not converge to $0$; instead, it stops to decrease at around $0.03$. This suggests that $\hat{h}_1$ is an biased and asymptotically inconsistent estimator for $h_1$. The $\hat{h}_1^m$ with $m=2^{16}$ is $[0.083,0.186, 0.296, 0.406, 0.503]^T/0.74$. Compared to $h_1$, there are negative biases for small entries of $h_1$, and positive biases for large entries of $h_1$. Actually, there are some theoretical evidences for this phenomenon as well. In general, when there are infinitely many parameters present, in our case $\lambda_i$, we do not expect the unbiasedness of our estimators. \\
 
-\noindent In applications like clustering or classifying graphs, we may not care about $\hat{h}_1$ at all. We are more interested in $\hat{\lambda}_i$ which specifically provides information about graph $i$. The bottom two plots are boxplots of $\hat{\lambda}_i$ for different values of $m$. The first one plots $\hat{\lambda}_i$ computed from joint embedding. The second one plots $\hat{\lambda}_i$ computed by forcing $\hat{h}_1$ equal to $h_1$. $\hat{\lambda}_i$ calculated this way can be thought of as 'oracle' estimates, since it assumes $h_1$ is known. Not surprisingly, the two plots look very similar since $||\hat{h}_1-h_1||$ is small for large $m$.
+\noindent In applications like clustering or classifying graphs, we may not care about $\hat{h}_1$ at all. We are more interested in $\hat{\lambda}_i$ which specifically provides information about graph $i$. The next plot shows boxplots of $\hat{\lambda}_i$ for different values of $m$ using two methods. For each value of m, the first boxplot shows estimates $\hat{\lambda}_i$ which are computed from joint embedding by
+\[ \hat{\lambda}_i = \langle A_i,  \hat{h}^m_1 \hat{h}^{m T}_1 \rangle \]
+The second boxplot shows $\hat{\lambda}_i$ computed by forcing $\hat{h}_1$ equal to $h_1$, that is 
+\[ \hat{\lambda}_i = \langle A_i,  h_1 h_1^T \rangle \]
+$\hat{\lambda}_i$ calculated this way can be thought of as 'oracle' estimates, since it assumes $h_1$ is known. Not surprisingly, the two boxplots look similar since $||\hat{h}^m_1-h_1||$ is small for large $m$.
 \begin{figure}[!htbp]
 	\centering
-	\includegraphics[scale=0.6,width=3.0in]{lambdahat.png}
+	\includegraphics[scale=0.6,width=3.0in]{lambda comaprison.png}
 	\caption{Boxplot for Lambda Estimates}
-	%\label{fig:awesome_image}
-\end{figure}
-\begin{figure}[!htbp]
-	\centering
-	\includegraphics[scale=0.6,width=3.0in]{tlambdahat.png}
-	\caption{Boxplot for Lambda Estimates Using True $h_1$}
 	%\label{fig:awesome_image}
 \end{figure}
 
@@ -227,14 +224,23 @@ In terms of SBM, this graph generation scheme is also equivalent to,
 \[ A_i|Y_i=0 \sim  SBM((1,...,1,2,...,2),\begin{bmatrix} 0.3 & 0.2 \\ 0.2 & 0.3 \\ \end{bmatrix})  \]
 \[ A_i|Y_i=1 \sim  SBM((1,...,1,2,...,2),\begin{bmatrix} 0.25 & 0.2 \\ 0.2 & 0.25 \\ \end{bmatrix})\]
 
-\noindent To classify graphs, we first apply joint embedding algorithm to $200$ graphs. Then, a k-nearest neighbor classifier is constructed based on loadings $\hat{\Lambda}$ by treating ith row as a feature vector for graph $i$. The embeddings of $200$ graphs are shown in the figure below. We can see two classes are clearly separated after being jointly embedded. The 3-NN classification error is $0$. 
-
+\noindent To classify graphs, we first apply joint embedding algorithm to $200$ graphs. The embeddings are shown in the figure below. We can see two classes are clearly separated after being jointly embedded.
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[scale=0.6,width=3.0in]{JE_200.png}
 	\caption{$\Lambda_i$ of jointly embedded graphs}
 	%\label{fig:awesome_image}
 \end{figure}
+Then, a 1-nearest neighbor classifier is constructed based on loadings $\hat{\Lambda}$ by treating ith row as a feature vector for graph $i$. The 1-NN classification error with $200$ graphs is $0$. 
+
+\noindent We compare classification performance using joint embedding and ASE. In paper ***, *** introduces a semi-parametric statistic on adjacency spectral embeddings of two graphs. It is used to test the hypothesis that whether a graph follows a SBM model or not and is shown to be consistent when the number of vertices goes to infinity. Here, we treat each semi-parametric statistic as distance between two graphs and also apply 1-NN to classify graphs. We let the number of graphs $m$ to increase from $4$ to $200$. For each value of $m$, we repeat simulations $20$ times. The result is shown in the next figure. We see joint embedding takes the advantage of increasing sample size and dominates ASE at all values of $m$. 
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[scale=0.6,width=3.0in]{acc_ase_je.png}
+	\caption{Classification Performance of Joint Embedding and ASE}
+	%\label{fig:awesome_image}
+\end{figure} 
+
 
 \begin{comment}
 \begin{enumerate}	
