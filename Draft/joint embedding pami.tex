@@ -13,6 +13,7 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{bbm}
+\usepackage{listings}
 
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
@@ -57,12 +58,12 @@
 
 \IEEEtitleabstractindextext{
 \begin{abstract}
-In this paper, we propose an method to jointly embed multiple graphs into low dimensional space. The method identifies a linear subspace  and projects adjacency matrices into the subspace. The corresponding coefficients can be treated as features of graphs. We propose a random graph model and prove that our method produce estimates with small errors under simple settings.  We demonstrate through simulation studies and real data experiments that our joint embedding method leads to state of the art performance in inference on multiple graphs. 
+In this paper, we propose an method to jointly embed multiple undirected graphs. The method identifies a linear subspace spanned by rank symmetric matrices and projects adjacency matrices of graphs into the subspace. The embedding coefficients can be treated as features of graphs. We propose a random graph model which can be used to model multiple random graphs. It can be shown that under the model our method produces estimates of parameters with small errors. We demonstrate through simulation experiments that our joint embedding method leads to state of the art performance in inference on multiple graphs. We further conduct a real data experiment which shown that individual creativity index can be predicted by the neural connectivity of human brain.
 \end{abstract}
 
 % Note that keywords are not normally used for peerreview papers.
 \begin{IEEEkeywords}
-random graph, feature extraction, inference on multiple graphs
+random graph, feature extraction, inference on graphs
 \end{IEEEkeywords}}
 
 
@@ -282,10 +283,10 @@ In terms of SBM, this graph generation scheme is also equivalent to,
 \end{figure}
 Then, an 1-nearest neighbor classifier is constructed based on loadings $\{\hat{\lambda}_i\}_{i=1}^m$. The 1-NN classification error with $200$ graphs is $0$. \\
 \\
-\noindent We compare classification performance using joint embedding and adjacency spectral embedding. Tang et al. \cite{tang2014semiparametric} introduces a semi-parametric statistic on adjacency spectral embeddings of two graphs. It is used to test the hypothesis that whether a graph follows a SBM model or not. It has been shown to be consistent when the number of vertices goes to infinity. Here we treat semi-parametric statistic between two graphs as a distance metric and also apply 1-NN to classify graphs. We let the number of graphs $m$ to increase from $4$ to $200$. For each value of $m$, we repeat the simulation $20$ times. The result is shown in the next figure. We see joint embedding takes advantage of increasing sample size and dominates ASE at all values of $m$. 
+\noindent We compare classification performance using joint embedding and laplacian eigenmap \cite{belkin2003laplacian}. For laplacian eigenmap, we first embed each normalized laplacian matrix and then compute Frobenious norm between embeddings. We also apply a 1-NN rule to classify graphs. We let the number of graphs $m$ to increase from $4$ to $200$. For each value of $m$, we repeat the simulation $100$ times. The result is shown in the next figure. We see joint embedding takes advantage of increasing sample size and dominates ASE at all values of $m$. 
 \begin{figure}[!htbp]
 	\centering
-	\includegraphics[scale=0.6,width=3.0in]{acc_ase_je.png}
+	\includegraphics[scale=0.6,width=3.0in]{leig_je_acc.png}
 	\caption{Classification Performance of Joint Embedding and ASE}
 	%\label{fig:awesome_image}
 \end{figure} 
@@ -293,11 +294,50 @@ Then, an 1-nearest neighbor classifier is constructed based on loadings $\{\hat{
 
 
 
-
-
-
 \subsection{Real Data Experiment: CCI}
 {\bf Filled In Later}
+If fit to only Lambda1,
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[scale=0.6,width=3.0in]{cci.png}
+	\caption{Predicting Creativity Index with Joint Embeddings}
+	%\label{fig:awesome_image}
+\end{figure}
+
+\begin{lstlisting}
+> model<-lm(cci~Lambda+1)
+> summary(model)
+
+Call:
+lm(formula = cci ~ Lambda + 1)
+
+Residuals:
+Min       1Q   Median       3Q      Max 
+-26.3432  -6.1444  -0.7578   7.1032  16.9004 
+
+Coefficients: Estimate  Pr(>|t|)    
+(Intercept)  1.275e+02   0.000275 ***
+Lambda1      2.421e-04   0.997981    
+Lambda2     -2.326e-01   0.070110 .  
+Lambda3     -3.716e-02   0.822592    
+Lambda4      8.049e-02   0.687628    
+Lambda5     -2.925e-01   0.421858    
+Lambda6     -4.285e-01   0.009088 ** 
+Lambda7     -1.745e-01   0.590533    
+Lambda8     -3.465e-01   0.240093    
+Lambda9     -8.970e-01   0.007999 ** 
+Lambda10    -8.955e-01   0.052839 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 
+0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 9.437 
+on 102 degrees of freedom，
+Multiple R-squared:  0.2325,
+Adjusted R-squared:  0.1572 
+F-statistic:  3.09 on 10 and 102 DF,  
+p-value: 0.001795
+\end{lstlisting}
 
 \section{conclusion}
 {\bf Filled In Later}
