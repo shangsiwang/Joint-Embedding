@@ -58,7 +58,7 @@
 
 \IEEEtitleabstractindextext{
 \begin{abstract}
-In this paper, we propose an method to jointly embed multiple undirected graphs. The method identifies a linear subspace spanned by rank symmetric matrices and projects adjacency matrices of graphs into the subspace. The embedding coefficients can be treated as features of graphs. We propose a random graph model which can be used to model multiple random graphs. It can be shown that under the model our method produces estimates of parameters with small errors. We demonstrate through simulation experiments that our joint embedding method leads to state of the art performance in inference on multiple graphs. We further conduct a real data experiment which shown that individual creativity index can be predicted by the neural connectivity of human brain.
+In this paper, we propose a method to jointly embed multiple undirected graphs. The method identifies a linear subspace spanned by rank one symmetric matrices and projects adjacency matrices of graphs into the subspace. The embedding coefficients can be treated as features of graphs. We propose a random graph model which can be used to model multiple random graphs. It can be shown that under the model our method produces estimates of parameters with small errors. We demonstrate through simulation experiments that our joint embedding method leads to state of the art performance for inference on multiple graphs. We further conduct a real data experiment which shows that an individual creativity index can be predicted by the neural connectivity of the human brain.
 \end{abstract}
 
 % Note that keywords are not normally used for peerreview papers.
@@ -76,62 +76,62 @@ random graph, feature extraction, inference on graphs
 
 
 \IEEEraisesectionheading{\section{Introduction}\label{sec:introduction}}
-\noindent \IEEEPARstart{I}n many problems arising in science, graphs appears naturally as data to model complex relationship between a set of objects. Graphs have been used in various application domains as diverse as social networks\cite{otte2002social}, internet map\cite{govindan2000heuristics}, brain connectomics\cite{bullmore2011brain}, political voting networks \cite{ward2011network},  and many others. The graphs are naturally high dimensional object with complicated topological structure which makes graphs clustering and classification a challenge to traditional machine learning algorithms. Therefore, a feature extraction and dimension reduction technique is in desperate need to study graphs. In this paper, we propose an algorithm to jointly embed multiple graphs into low dimensional space. We demonstrate through theories and experiments that our embedding algorithm produces features which lead to state of the art performance for subsequent inference tasks on graphs.  \\
+\noindent \IEEEPARstart{I}n many problems arising in science, graphs appear naturally as data to capture complex relationships between a set of objects. Graphs have been used in various application domains as diverse as social networks\cite{otte2002social}, internet mapping\cite{govindan2000heuristics}, brain connectomics\cite{bullmore2011brain}, political voting networks \cite{ward2011network},  and many others. The graphs are naturally high dimensional objects with complicated topological structure which makes graph clustering and classification a challenge to traditional machine learning algorithms. Therefore, feature extraction and dimension reduction techniques are helpful in the study of graphs. In this paper, we propose an algorithm to jointly embed multiple graphs into low dimensional space. We demonstrate through theory and experiments that our embedding algorithm produces features which lead to state of the art performance for subsequent inference tasks on graphs.  \\
 
-\noindent There exist a few unsupervised approaches to extract features from graphs. First, classical PCA can be applied by treating each edge of graphs a raw feature vector\cite{jolliffe2002principal}. This approach produces features which are linear combinations of edges, but it ignores the topological structure of graphs and features extracted are not interpretable. Second, features can be extract by computing summary topological and label statistics from graphs\cite{li2011graph}. These statistics commonly include number of edges, number of triangles, average clustering coefficient, maximum effective eccentricity, etc. In general, it is hard to know what intrinsic statistics to compute a priori and computing some statistics can be quite computational expensive. Also, some filtering criteria based on frequency of a subgraph are proposed. For example, fast frequent subgraph mining algorithm can identify all connected subgraphs that occurs in a large fraction of graphs in a graph data set\cite{huan2003efficient}. Spectral feature selection can also be applied to graphs. It treats each graph sample as a node and constructed an object graph. Features are computed through the spectral decomposition of object graph\cite{zhao2007spectral}. \\
+\noindent There exist a few unsupervised approaches to extract features from graphs. First, classical PCA can be applied by treating each edge of graphs as a raw feature vector\cite{jolliffe2002principal}. This approach produces features which are linear combinations of edges, but it ignores the topological structure of graphs and features extracted are not easily interpretable. Second, features can be extract by computing summary topological and label statistics from graphs\cite{li2011graph}. These statistics commonly include number of edges, number of triangles, average clustering coefficient, maximum effective eccentricity, etc. In general, it is hard to know what intrinsic statistics to compute a priori and computing some statistics can be computational expensive. Also, some filtering criteria based on frequency of a subgraph are proposed. For example, the fast frequent subgraph mining algorithm can identify all connected subgraphs that occur in a large fraction of graphs in a graph data set\cite{huan2003efficient}. Spectral feature selection can also be applied to graphs. It treats each graph sample as a node and constructs an object graph. Features are computed through the spectral decomposition of this object graph\cite{zhao2007spectral}. \\
 
-\noindent The jointly embedding takes a matrix factorization approach to extract features from graphs. The algorithm manages to simultaneously identify a set of rank one matrices and project adjacency matrices into the linear subspace spanned by the set of rank one matrices. Joint embedding can be understood as a generalization of adjacency spectral embedding for multiple graphs \cite{sussman2012consistent}. We demonstrate through simulation experiments that our joint embedding algorithm extracts features which lead to good performance for a variety of inference tasks. In the next section, we review some random graph models and present a model for generating multiple random graphs. In Section 3, we define the joint embedding of graphs and present an algorithm to compute it. In Section 4, we perform some theoretical analysis of joint embedding. The theoretical results and a real data experiment are explored in Section 5. We conclude the paper with a brief discussion of possible future works.
+\noindent Our joint embedding takes a matrix factorization approach to extract features from graphs. The algorithm manages to simultaneously identify a set of rank one matrices and project adjacency matrices into the linear subspace spanned by this set of matrices. Joint embedding can be understood as a generalization of adjacency spectral embedding for multiple graphs \cite{sussman2012consistent}. We demonstrate through simulation experiments that our joint embedding algorithm extracts features which lead to good performance for a variety of inference tasks. In the next section, we review some random graph models and present a model for generating multiple random graphs. In Section 3, we define our joint embedding of graphs and present an algorithm to compute it. In Section 4, we perform some theoretical analyses of our joint embedding. The theoretical results and a real data experiment are explored in Section 5. We conclude the paper with a brief discussion of implications and possible future work.
 
 \section{Setting}
-In this paper, we focus on embedding unweighted and undirected graphs for simplicity, although the joint embedding algorithm works on weighted and directed graphs as well. Let $\{G_i=(V_i,E_i)\} _{i=1}^{m}$ be $m$ graphs each with $n$ vertices. We require the vertices in these graphs to be matched which means that all the graphs have a common vertex set $V$. The joint embedding algorithm tries to embed all $G_i$s simultaneously into $\mathbb{R}^d$ and represent $G_i$  by a vector $\lambda_i \in \mathbb{R}^d$. Before discussing the joint embedding algorithm, we first introduce three random graph models.
+In this paper, we focus on embedding unweighted and undirected graphs for simplicity, although the joint embedding algorithm works on weighted and directed graphs as well. Let $\{G_i=(V_i,E_i)\} _{i=1}^{m}$ be $m$ graphs each with $n$ vertices. We require that the vertices in these graphs are matched, which means that all the graphs have a common vertex set $V$. The joint embedding algorithm embeds all $G_i$s simultaneously into $\mathbb{R}^d$ and represents $G_i$  by a vector $\lambda_i \in \mathbb{R}^d$. Before discussing the joint embedding algorithm, we first introduce three random graph models.
 
-\begin{definition} (Stochastic Block Model (SBM)) Let $\pi$ be a prior probability vector for block membership. Denote $\tau=(\tau_1,\tau_2,...,\tau_n) \sim \in [K]^n$ be a block membership vector, where $\tau_i$ are independent and identically distributed according to a probability vector $\pi \in \mathbb{R}^K$. Denote $B \in [0,1]^{K \times K}$ to be the block connecting probability matrix. Suppose $A$ is a random adjacency matrix given by,
+\begin{definition} (Stochastic Block Model (SBM)) Let $\pi$ be a prior probability vector for block membership which lies in the unit $K-1$-simplex. Denote by $\tau=(\tau_1,\tau_2,...,\tau_n) \in [K]^n$ the block membership vector, where $\tau_i$ are independent and identically distributed according to the multinomial distribution with probability vector $\pi \in \mathbb{R}^K$., that is $\tau_i $ Denote by $B \in [0,1]^{K \times K}$ the block connectivity probability matrix. Suppose $A$ is a random adjacency matrix given by,
 \[ P(A|\tau,B)= \prod_{i<j} B_{\tau_i,\tau_j}^{A_{i,j}} (1-B_{\tau_i,\tau_j})^{(1-A_{i,j})}\] 
-Then, we say $A$ is an adjacency matrix of a K-block stochastic block model graph, and we write $A \sim SBM(\pi,B)$. We may also treat $\tau$ as the parameter of interest, then we write $A \sim SBM(\tau,B)$.
+Then, we say $A$ is an adjacency matrix of a K-block stochastic block model graph, and we write $A \sim SBM(\pi,B)$. We may also treat $\tau$ as the parameter of interest, in this case we write $A \sim SBM(\tau,B)$.
 \end{definition}
 
-\noindent SBM is a widely used model to study community structure of a graph\cite{karrer2011stochastic}. We then recall the notion of a random dot product graph\cite{young2007random}. 
+\noindent SBM is a widely used model to study community structure of a graph\cite{karrer2011stochastic}. Next, we recall the notion of a random dot product graph\cite{young2007random}. 
 
-\begin{definition} (Random Dot Product Graph (RDPG)) Let $F$ be a distribution on a set $\mathcal{X} \in \mathbb{R}^d$ satisfying $x^T y \in [0, 1]$ for all $x, y \in \mathcal{X}$. Let $X=[X_1^T,X_2^T,...,X_n^T] \in \mathbb{R}^{n \times d}$. We say $(X,A) \sim RDPG(F)$ if $X_i$ is independent and identically distributed according to $F$ and condition on $X$, $A_{ij}$ is an independent Bernoulli random variable.
-\[ A_{ij} \sim Bernoulli(X_i^T X_j) \]
+\begin{definition} (Random Dot Product Graph (RDPG)) Let $F$ be a distribution on a set $\mathcal{X} \in \mathbb{R}^d$ satisfying $x^T y \in [0, 1]$ for all $x, y \in \mathcal{X}$. Let $X=[X_1^T,X_2^T,...,X_n^T] \in \mathbb{R}^{n \times d}$. We say $(X,A) \sim RDPG(F)$ if the $X_i$ are independent and identically distributed according to $F$ ,and conditioned on $X$, the $A_{ij}$ are independent Bernoulli random variables,
+\[ A_{ij} \sim Bernoulli(X_i^T X_j). \]
 Alternatively,
 \[ P(A|X) = \prod_{i<j} X_i^T X_j ^{ A_{ij}} (1-X_i^T X_j)^{1- A_{ij}}\]
 Also, we define $P:=XX^T$ to be edge probability matrix. When we are more interested in estimating latent positions $X$, we treat $X$ as parameters and write $A \sim RDPG(X)$.
 \end{definition}
 
-\begin{definition} (Multiple Random Eigen Graphs (MREG)) Let $\{h_k\}_{k=1}^{d}$ be a set of norm-1 vectors in $\mathbb{R}^{n}$, and  $F$ be a distribution on a set $\mathcal{X} \in \mathbb{R}^d$,  satisfying $\sum\limits_{k=1}^{d} \lambda [k] h_k  h_k^T \  \in [0, 1]^{n \times n} $ for all $\lambda \in \mathcal{X}$, where $\lambda[k]$ is the kth entry of vector $\lambda$. We say $\{(\lambda_i,A_i)\}_{i=1}^{m}$ follows a m-graph d-dimensional multiple random eigen graphs model and write
+\begin{definition} (Multiple Random Eigen Graphs (MREG)) Let $\{h_k\}_{k=1}^{d}$ be a set of norm-1 vectors in $\mathbb{R}^{n}$, and  $F$ be a distribution on a set $\mathcal{X} \in \mathbb{R}^d$,  satisfying $\sum\limits_{k=1}^{d} \lambda [k] h_k  h_k^T \  \in [0, 1]^{n \times n} $ for all $\lambda \in \mathcal{X}$, where $\lambda[k]$ is the $k$th entry of vector $\lambda$. We say $\{(\lambda_i,A_i)\}_{i=1}^{m}$ follows a $m$-graph $d$-dimensional multiple random eigen graphs model and write
 \[\{(\lambda_i,A_i)\}_{i=1}^{m} \sim MREG(F,h_1,...,h_d)\]
-if $\lambda_i$ is independent and identically distributed according to $F$, and condition on $\lambda_i$, the entries of $A_i$ follows independent Bernoulli distribution,
+if the $\lambda_i$ are independent and identically distributed according to $F$, and conditioned on $\lambda_i$, the entries of $A_i$ are independent Bernoulli random variables,
 \[ A_{i}[s,t] \sim Bernoulli( \sum_{k=1}^{d} \lambda_{i}[k] h_{k} [s] h_{k} [t] ) \]
 We call $P_i:=\sum_{k=1}^{d} \lambda_i [k] h_k  h_k^T$ the edge probability matrix for graph $i$. In cases that we are more interested in $\{\lambda_i\}_{i=1}^m$, we treat them as parameters and write 
-\[\{A_i\}_{i=1}^{m} \sim MREG(\lambda_1,...,\lambda_m,h_1,...,h_d)\] 
+\[\{A_i\}_{i=1}^{m} \sim MREG(\lambda_1,...,\lambda_m,h_1,...,h_d).\] 
 \end{definition}
 
 
-\noindent In MREG, we allow self loops to happen. It is mainly for the convenience of proving theories. If we ignore the self loops, we can have the following relationships between three random graph models. If an adjacency matrix $A \sim SBM(\pi,B)$ and the block connecting matrix $B$ is semi-positive definite, $A$ can also be written as a $RDPG(F)$ with $F$ being a finite mixture of point masses. If an adjacency matrix $A \sim RDPG(X)$, then it is also a 1-graph $MREG(\lambda_1,h_1,...,h_d)$ with $h_k$ being the normalized kth column of $X$ and $\lambda_1$ being the vector containing squared norm of kth column of $X$. However, 1-graph $MREG(\lambda_1,h_1,...,h_d)$ is not necessarily a RDPG graph since $\lambda_1$ could contain negative entries which may result an indefinite edge probability matrix. If $m$ RDPG graphs have edge probability matrices sharing the same eigenspace, they also follow a m-graph MREG model. 
+\noindent In MREG, we allow self loops to happen. It is mainly for the convenience of proving theories. If we ignore the self loops, we have the following relationships between three random graph models. If an adjacency matrix $A \sim SBM(\pi,B)$ and the block connectivity matrix $B$ is positive semi-definite, $A$ can also be written as a $RDPG(F)$ with $F$ being a finite mixture of point masses. If an adjacency matrix $A \sim RDPG(X)$, then it is also a 1-graph $MREG(\lambda_1,h_1,...,h_d)$ with $h_k$ being the normalized kth column of $X$ and $\lambda_1$ being the vector containing squared norm of kth column of $X$. However, a 1-graph $MREG(\lambda_1,h_1,...,h_d)$ is not necessarily an RDPG graph since $\lambda_1$ could contain negative entries which may result an indefinite edge probability matrix. If $m$ RDPG graphs have edge probability matrices sharing the same eigenspace, they also follow a m-graph MREG model. 
 
 \section{Methodology}
 \subsection{Joint Embedding of Graphs}
-The joint embedding method considers a collection of vertex-aligned graphs, and estimates a common embedding space across all graphs and a loading for each graph. Specifically, it simultaneously identifies a subspace spanned by a set of rank one symmetric matrices $\{\hat{h}_k \hat{h}_k^T\}_{k=1}^{d}$. and projects each adjacency matrix $A_i$ linearly into the subspace. The coefficients obtained by projecting $A_i$ is denoted by $\hat{\lambda}_i \in \mathbb{R}^d$ which is called loadings for graph $i$. To estimate rank one symmetric matrices and loadings for graphs, we minimize the sum of squared Frobenius distances between adjacency matrices and their projections. The detailed definition of joint embedding of graphs is provided below.
+Our joint embedding method considers a collection of vertex-aligned graphs, and estimates a common embedding space across all graphs and a loading for each graph. Specifically, it simultaneously identifies a subspace spanned by a set of rank one symmetric matrices $\{\hat{h}_k \hat{h}_k^T\}_{k=1}^{d}$. and linearly projects each adjacency matrix $A_i$ into the subspace. The coefficients obtained by projecting $A_i$ are denoted by $\hat{\lambda}_i \in \mathbb{R}^d$ which is called the loadings for graph $i$. To estimate rank one symmetric matrices and loadings for graphs, we minimize the sum of squared Frobenius distances between adjacency matrices and their projections as described below.
 
-\begin{definition} (Joint Embeddings of Graphs) Given $m$  graphs $\{G_i \} _{i=1}^{m}$ with $n$ vertices, let $A_i \in \{0,1\}^{n \times n }$ denote  the adjacency matrices of graph $G_i$. The d-dimensional joint embedding of graphs $\{G_i \} _{i=1}^{m}$ are given by,
+\begin{definition} (Joint Embeddings of Graphs) Given $m$  graphs $\{G_i \} _{i=1}^{m}$ with $n$ vertices, let $A_i \in \{0,1\}^{n \times n }$ denote  the adjacency matrix of graph $G_i$. The $d$-dimensional joint embedding of graphs $\{G_i \} _{i=1}^{m}$ is given by,
 \begin{equation}\label{eq:1}
- (\hat{\lambda}_1,...,\hat{\lambda}_m,\hat{h}_1,...,\hat{h}_d) = \underset{\lambda_i,\|h_k\|=1}{\operatorname{argmin}} \sum\limits_{i=1}^{m} \| A_i- \sum\limits_{k=1}^{d} \lambda_{i}[k] h_k h_k^T \|  ^2  
+ (\hat{\lambda}_1,...,\hat{\lambda}_m,\hat{h}_1,...,\hat{h}_d) = \underset{\lambda_i,\|h_k\|=1}{\operatorname{argmin}} \sum\limits_{i=1}^{m} \| A_i- \sum\limits_{k=1}^{d} \lambda_{i}[k] h_k h_k^T \|  ^2.  
 \end{equation}
-Here, $\| \cdot \|$ denotes the Frobenius norm and $\lambda_{i}[k]$ is the kth entry of vector $\lambda_i$
+Here, $\| \cdot \|$ denotes the Frobenius norm and $\lambda_{i}[k]$ is the $k$th entry of vector $\lambda_i$
 \end{definition}
 
-\noindent  To make the model identifiable, we put an extra requirement on the norm of $h_k$. To ease our notation, we introduce two matrices $\Lambda \in \mathbb{R}^{m \times d}$ and $H\in \mathbb{R}^{n \times d}$, where $\lambda_i$ is the ith row of $\Lambda$ and $h_k$ is the kth row of $H$. That is $\Lambda=[\lambda_1^T,...,\lambda_m^T]$ and $H=[h_1,...,h_d]$. We can rewrite equation~\eqref{eq:1} using $\Lambda$ and $H$,
+\noindent  To make the model identifiable, we put an extra requirement on the norm of $h_k$. To ease our notation, we introduce two matrices $\Lambda \in \mathbb{R}^{m \times d}$ and $H\in \mathbb{R}^{n \times d}$, where $\lambda_i$ is the $i$th row of $\Lambda$ and $h_k$ is the $k$th row of $H$. That is $\Lambda=[\lambda_1^T,...,\lambda_m^T]$ and $H=[h_1,...,h_d]$. We can rewrite equation~\eqref{eq:1} using $\Lambda$ and $H$,
 \begin{equation*}
-(\hat{\Lambda},\hat{H}) = \underset{\Lambda,\|h_k\|=1}{\operatorname{argmin}} \sum\limits_{i=1}^{m} \| A_i- \sum\limits_{k=1}^{d} \Lambda_{ik} h_k h_k^T \|  ^2  
+(\hat{\Lambda},\hat{H}) = \underset{\Lambda,\|h_k\|=1}{\operatorname{argmin}} \sum\limits_{i=1}^{m} \| A_i- \sum\limits_{k=1}^{d} \Lambda_{ik} h_k h_k^T \|  ^2.  
 \end{equation*}
- We denote the function on the left hand side of the equation by $f(\Lambda,H)$ which is implicitly a function of $\lambda_i$s and $h_k$s. There are several alternative ways to formulate the problem. If we convert $\lambda_i$ into a diagonal of matrix $D_i \in \mathbb{R}^{d \times d}$ by putting entries of $\lambda_i$ on the diagonal of $D_i$, then solving equation \eqref{eq:1} is equivalent to
-\[  \underset{D_i,\|h_k\|=1}{\operatorname{argmin}} \sum\limits_{i=1}^{m} \| A_i- H D_i H^T \|  ^2  \text{ , subject to $D_i$ is diagonal}\]
-We may also view \eqref{eq:1} as a tensor factorization problem. If $\{A_i\}_{i=1}^m$ are stacked up to a 3-D array ${\bf A} \in \mathbb{R}^{m\times n \times n}$, then solving equation~\eqref{eq:1} is also equivalent to
+ We denote the function on the left hand side of the equation by $f(\Lambda,H)$ which is implicitly a function of $\lambda_i$s and $h_k$s. There are several alternative ways to formulate the problem. If we convert $\lambda_i$ into a diagonal of matrix $D_i \in \mathbb{R}^{d \times d}$ by putting entries of $\lambda_i$ on the diagonal of $D_i$, then solving equation \eqref{eq:1} is equivalent to solving
+\[  \underset{D_i,\|h_k\|=1}{\operatorname{argmin}} \sum\limits_{i=1}^{m} \| A_i- H D_i H^T \|  ^2  \text{ , subject to $D_i$ is diagonal.}\]
+We may also view \eqref{eq:1} as a tensor factorization problem. If $\{A_i\}_{i=1}^m$ are stacked in a 3-D array ${\bf A} \in \mathbb{R}^{m\times n \times n}$, then solving equation~\eqref{eq:1} is also equivalent to
 \[  \underset{\Lambda,\|h_k\|=1}{\operatorname{argmin}}  \| {\bf A} - \sum\limits_{k=1}^{d} \Lambda_{*k} \otimes h_k \otimes h_k\|  ^2  \]
-where $\otimes$ denotes the tensor product and $\Lambda_{*k}$ is the kth column of $\Lambda$. \\
+where $\otimes$ denotes the tensor product and $\Lambda_{*k}$ is the $k$th column of $\Lambda$. \\
 
-\noindent The optimization problem in equation \eqref{eq:1} is also similar to principle component analysis in the sense of minimizing squared reconstruction error to recover loadings and components. However, there are extra symmetricity and rank constrains on the components. In case of embedding only one graph, the joint embedding is equivalent to the adjacency spectral embedding solved by singular value decomposition. Next, we describe an algorithm to optimize the objective function $f(\Lambda,H)$.  
+\noindent The optimization problem in equation \eqref{eq:1} is also similar to principle component analysis in the sense of minimizing squared reconstruction error to recover loadings and components. However, there are extra symmetries and rank constraints on the components. In case of embedding only one graph, the joint embedding is equivalent to the adjacency spectral embedding solved by singular value decomposition. Next, we describe an algorithm to optimize the objective function $f(\Lambda,H)$.  
 
 \subsection{Alternating Descent Algorithm}
 \noindent Joint embedding of $\{G_i \} _{i=1}^{m}$ can be estimated by solving the optimization problem in equation \eqref{eq:1}. There are a few methods proposed to solve similar problems. Carroll and Chang \cite{carroll1970analysis} propose to use an alternating method that ignores symmetry, with the idea that it will often converge to a symmetric solution. Gradient approaches have also been considered for similar problems \cite{tang2009clustering} \cite{kolda2015numerical}. We develop an alternating descent algorithm to minimize $f(\Lambda,H)$. The algorithm iteratively updates one of $\Lambda$ and $H$ while treating the other parameter as fixed. We will see that optimizing $\Lambda$ when fixing $H$ is easy, since it is essentially a least square problem. However, optimizing $H$ when fixing $\Lambda$ is hard due to the fact that the problem is non-convex and there is no closed form solution available. In this case, we use gradient information and take an Armijo line search strategy to update $H$ \cite{nocedal2006numerical}. \\
@@ -233,7 +233,7 @@ We see $E(\lambda_i^2)(h_1^T h)^4$ is clearly maximized when $h=h_1$; however, t
 \[\hat{\lambda}_i^m \rightarrow \langle A_i,h' h'^T \rangle = h'^T A_i h'\]
 Then applying theorem 2 and utilizing the fact that $h^T A_i h$ is continuous in $h$, we may have a upper bound on $|\hat{\lambda}_i^m - h_1^T A_i h_1|$. In general, $h_1^T A_i h_1$ is concentrated about $\lambda_i$ with high probability. 
 
-\section{Experiment}
+\section{Experiments}
 Before going into details of experiments, we want to discuss how to select the dimensionality of embedding $d$. Estimating $d$ is an important model selection question which has been studied for years under various settings. It is not the focus of this paper, but we still face this decision in numerical experiments. In the simulation experiments of this section, we assume $d$ is known to us and simply set our dimension estimate $\hat{d}$ equal to the $d$. In the real data experiment, we recommend two approaches to determine $\hat{d}$. Both approaches require first run $d'$-dimensional joint embedding algorithm, where $d'$ needs to be large and we are confident $d$ is less $d'$. We then plot the objective function versus dimension, and determine $\hat{d}$ where the objective start to flatten out. Alternatively, we can plot $\{\hat{\Lambda}_{ik}\}_{i=1}^m$ for $k=1,...d'$, and select $\hat{d}$ where the average loadings start to look like noise with $0$ mean. These two approaches usually yield similar dimensionality estimates $\hat{d}$. 
 
 \subsection{Simulation Experiment 1: Joint Embedding in Simple Settings}
@@ -295,53 +295,27 @@ Then, an 1-nearest neighbor classifier is constructed based on loadings $\{\hat{
 
 
 \subsection{Real Data Experiment: CCI}
-{\bf Filled In Later}
-If fit to only Lambda1,
+In this experiment, we consider predicting individual composite creativity index (CCI) through functional (structural???) magnetic resonance imaging. Neuroimaging and creativity have been jointly investigated previously \cite{arden2010neuroimaging}. Most of studies utilize a statistical testing method and find CCI significant related or inversely related to the activity of some regions of brain. We embrace a different approach by finding a regression model for CCI. We first jointly embed brain images and then regress CCI loadings estimated.
+
+\noindent 113 healthy, young adult subjects were scanned on using (???) scanner with functional magnetic resonance imaging. The image is then registered by Desikan atlas(???) \cite{desikan2006automated} and a graph of 70 vertices is constructed through computing pairwise correlations across regions. DT measures were scored by (???) independent judges using the Consensual Assessment Technique \cite{amabile1983social}, from which a CCI was derived. To predict CCI, we jointly embed 113 graphs with $d=10$. Then, we construct a linear regression model by treating CCI as the response variable and $\hat{\lambda}_i$ as predictors, that is
+\[CCI_i \sim \beta_0+\lambda_i^T\beta + \epsilon_i \]
+If only $\hat{\lambda}_i[1]$ is used as predictor, the figure \ref{fig:cci} shows the result. We can see a linear relationship between CCI and first dimension loadings. If fit CCI to all the loadings, a summary of the linear model is provided in appendix. The R-square is $0.2325$ and the model is statistically significant better compared to the null model with a p-value $0.0018$. 
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[scale=0.6,width=3.0in]{cci.png}
 	\caption{Predicting Creativity Index with Joint Embeddings}
-	%\label{fig:awesome_image}
+	\label{fig:cci}
 \end{figure}
 
-\begin{lstlisting}
-> model<-lm(cci~Lambda+1)
-> summary(model)
 
-Call:
-lm(formula = cci ~ Lambda + 1)
-
-Residuals:
-Min       1Q   Median       3Q      Max 
--26.3432  -6.1444  -0.7578   7.1032  16.9004 
-
-Coefficients: Estimate  Pr(>|t|)    
-(Intercept)  1.275e+02   0.000275 ***
-Lambda1      2.421e-04   0.997981    
-Lambda2     -2.326e-01   0.070110 .  
-Lambda3     -3.716e-02   0.822592    
-Lambda4      8.049e-02   0.687628    
-Lambda5     -2.925e-01   0.421858    
-Lambda6     -4.285e-01   0.009088 ** 
-Lambda7     -1.745e-01   0.590533    
-Lambda8     -3.465e-01   0.240093    
-Lambda9     -8.970e-01   0.007999 ** 
-Lambda10    -8.955e-01   0.052839 .  
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 
-0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 9.437 
-on 102 degrees of freedom，
-Multiple R-squared:  0.2325,
-Adjusted R-squared:  0.1572 
-F-statistic:  3.09 on 10 and 102 DF,  
-p-value: 0.001795
-\end{lstlisting}
 
 \section{conclusion}
-{\bf Filled In Later}
+In summary, we develop a joint embedding method which can simultaneously embed multiple graphs into low dimensional space. Joint embedding can
+be used to estimate simple and intuitive statistics for inference problems on multiple vertex matched graphs. Learning on multiple graphs has significant applications in diverse fields and our results have both theoretical and practical implications for the problem. As the real data experiment illustrate, joint embedding is a practically viable inference procedure. \\
 
+\noindent We also propose a Multiple Random Eigen Graphs model. It can be seen as a generalization of random dot product graph model or stochastic block model for multiple random graphs. We analyze the performance of joint embedding on this model under simple settings. It can be shown our method provides estimates with bounded error. \\
+
+\noindent Our approach is intimately related other matrix factorization approaches like singular value decomposition and tensor factorization. Indeed, they all try to estimate a low dimensional representation of high dimensional objects. We are currently investigate joint embedding with more or less regularizations on parameters under difference real set ups.  
 
 \appendix
 \begin{proof} [Proof of Theorem 4.1]
@@ -440,7 +414,41 @@ The first part of proof is showing that $h'$ is the eigenvector corresponds to t
 	\[\|h'-h_1\| \leq \frac{2 E(\lambda_i)}{E(\lambda_i^2)(h_1^T h')^2} \]
 \end{proof}
 
+\noindent{\bf CCI Linear Model Summary}
+\begin{lstlisting}
+> model<-lm(cci~Lambda+1)
+> summary(model)
 
+Call:
+lm(formula = cci ~ Lambda + 1)
+
+Residuals:
+Min       1Q   Median     3Q    Max 
+-26.3432 -6.144 -0.7578 7.1032  16.9004 
+
+Coefficients: Estimate  Pr(>|t|)    
+(Intercept)  1.275e+02   0.000275 ***
+Lambda1      2.421e-04   0.997981    
+Lambda2     -2.326e-01   0.070110 .  
+Lambda3     -3.716e-02   0.822592    
+Lambda4      8.049e-02   0.687628    
+Lambda5     -2.925e-01   0.421858    
+Lambda6     -4.285e-01   0.009088 ** 
+Lambda7     -1.745e-01   0.590533    
+Lambda8     -3.465e-01   0.240093    
+Lambda9     -8.970e-01   0.007999 ** 
+Lambda10    -8.955e-01   0.052839 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 
+0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 9.437 
+on 102 degrees of freedom，
+Multiple R-squared:  0.2325,
+Adjusted R-squared:  0.1572 
+F-statistic:  3.09 on 10 and 102 DF,  
+p-value: 0.001795
+\end{lstlisting}
 
 % references section
 
