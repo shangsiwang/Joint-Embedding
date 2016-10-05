@@ -14,6 +14,8 @@
 \usepackage{graphicx}
 \usepackage{bbm}
 \usepackage{listings}
+\usepackage{ragged2e}
+
 
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
@@ -37,15 +39,11 @@
 \begin{document}
 \title{Joint Embedding of Graphs}
 \author{Shangsi Wang,
-        Carey E. Priebe,
         Joshua T. Vogelstein,
-        Avanti Athreya,
-        Minh Tang,
-        Vince Lyzinski,
-        Youngser Park
+        Carey E. Priebe
          
-%\IEEEcompsocitemizethanks{\IEEEcompsocthanksitem Shangsi Wang was with the Department of Applied Mathematics and Statistics, Johns Hopkins University,MD, 21218.\protect\\E-mail: swang127@jhu.edu
-%\IEEEcompsocthanksitem Shangsi Wang was with the Department of Applied Mathematics and Statistics, Johns Hopkins University,MD, 21218.}}
+\IEEEcompsocitemizethanks{\IEEEcompsocthanksitem Shangsi Wang and Carey Priebe are with the Department of Applied Mathematics and Statistics, Johns Hopkins University \protect\\E-mail: swang127@jhu.edu
+\IEEEcompsocthanksitem Joshua Vogelstein is with the Department of Biomedical Engineering, Johns Hopkins University}
 %\thanks{Manuscript received April 19, 2005; revised August 26, 2015.}
 }
 
@@ -57,8 +55,8 @@
 
 
 \IEEEtitleabstractindextext{
-\begin{abstract}
-In this paper, we propose a method to jointly embed multiple undirected graphs. Given a set of graphs $\{G_i=(V_i,E_i)\} _{i=1}^{m}$, our method identifies a linear subspace spanned by rank one symmetric matrices and projects adjacency matrices of graphs into the subspace. The projection coefficients can be treated as features of graphs which are helpful in graph clustering and classification. We also propose a random graph model which can be used to model multiple random graphs. It can be shown that under the model our method produces estimates of parameters with small errors. We demonstrate through simulation experiments that our joint embedding method  extracts features which lead to state of the art performance in classifying multiple graphs. We further conduct a real data experiment which shows that an individual composite creativity index can be predicted by the neural connectivity of the human brain through joint embedding.
+\justify \begin{abstract} 	
+Feature extraction and dimension reduction for networks arise in a wide variety of domains. Efficiently and accurately learning features for multiple graphs has important implications in statistical inference on graphs. In this manuscript, we propose a method to jointly embed multiple undirected graphs. Given a set of graphs, our method identifies a linear subspace spanned by rank one symmetric matrices and projects adjacency matrices of graphs into the subspace. The projection coefficients can be treated as features of graphs. We also propose a random graph model which can be used to model multiple random graphs. It can be shown through theory and numerical experiments that under the model our joint embedding method produces estimates of parameters with small errors. Via simulation experiments, we demonstrate that our joint embedding method  produces features which lead to state of the art performance in classifying multiple graphs. Applying our method to human brain graphs, we find it extracting interpretable features which can be used to predict individual composite creativity index.
 \end{abstract}
 
 % Note that keywords are not normally used for peerreview papers.
@@ -80,7 +78,7 @@ graphs, embed, feature extraction, statistical inference
 
 \noindent There exist a few unsupervised approaches to extract features from graphs. First, classical principal component analysis can be applied by treating each edge of graphs as a raw feature vector\cite{jolliffe2002principal}. This approach produces features which are linear combinations of edges, but it ignores the topological structure of graphs and features extracted are not easily interpretable. Second, features can be extracted by computing summary topological and label statistics from graphs\cite{li2011graph}. These statistics commonly include number of edges, number of triangles, average clustering coefficient, maximum effective eccentricity, etc. In general, it is hard to know what intrinsic statistics to compute a priori and computing some statistics can be computational expensive. Also, some filtering criteria based on frequency of a subgraph are proposed. For example, the fast frequent subgraph mining algorithm can identify all connected subgraphs that occur in a large fraction of graphs in a graph data set\cite{huan2003efficient}. Spectral feature selection can also be applied to graphs. It treats each graph as a node and constructs an object graph based on a similarity measure. Features are computed through the spectral decomposition of this object graph\cite{zhao2007spectral}. \\
 
-\noindent Adjacency spectral embedding (ASE) and laplacian eigenmap (LE) are proposed to embed a single graph observation\cite{sussman2012consistent}\cite{belkin2003laplacian}. The inference task considered is usually learning the block structure of the graph. Given a set of graphs $\{G_i=(V_i,E_i)\} _{i=1}^{m}$, ASE and LE need to embed each $G_i$ individually, and there is no easy way to combine multiple embeddings. Our joint embedding method considers the set graphs together. It takes a matrix factorization approach to extract features for multiple graphs. The algorithm manages to simultaneously identify a set of rank one matrices and project adjacency matrices into the linear subspace spanned by this set of matrices. Joint embedding can be understood as a generalization of ASE for multiple graphs. We demonstrate through simulation experiments that our joint embedding algorithm extracts features which lead to good performance for a variety of inference tasks. In the next section, we review some random graph models and present a model for generating multiple random graphs. In Section 3, we define our joint embedding of graphs and present an algorithm to compute it. In Section 4, we perform some theoretical analyses of our joint embedding. The theoretical results and a real data experiment are explored in Section 5. We conclude the paper with a brief discussion of implications and possible future work.
+\noindent Adjacency Spectral Embedding (ASE) and Laplacian Eigenmap (LE) are proposed to embed a single graph observation\cite{sussman2012consistent}\cite{belkin2003laplacian}. The inference task considered is usually learning the block structure of the graph. Given a set of graphs $\{G_i=(V_i,E_i)\} _{i=1}^{m}$, ASE and LE need to embed each $G_i$ individually, and there is no easy way to combine multiple embeddings. Our joint embedding method considers the set graphs together. It takes a matrix factorization approach to extract features for multiple graphs. The algorithm manages to simultaneously identify a set of rank one matrices and project adjacency matrices into the linear subspace spanned by this set of matrices. Joint embedding can be understood as a generalization of ASE for multiple graphs. We demonstrate through simulation experiments that our joint embedding algorithm extracts features which lead to good performance for a variety of inference tasks. In the next section, we review some random graph models and present a model for generating multiple random graphs. In Section 3, we define our joint embedding of graphs and present an algorithm to compute it. In Section 4, we perform some theoretical analyses of our joint embedding. The theoretical results and a real data experiment are explored in Section 5. We conclude the paper with a brief discussion of implications and possible future work.
 
 \section{Setting}
 In this paper, we focus on embedding unweighted and undirected graphs for simplicity, although the joint embedding algorithm works on weighted and directed graphs as well. Let $\{G_i=(V_i,E_i)\} _{i=1}^{m}$ be $m$ graphs each with $n$ vertices. We require that the vertices in these graphs are matched, which means that all the graphs have a common vertex set $V$. The joint embedding algorithm embeds all $G_i$s simultaneously into $\mathbb{R}^d$ and represents $G_i$  by a vector $\lambda_i \in \mathbb{R}^d$. Before discussing the joint embedding algorithm, we first introduce three random graph models.
@@ -303,25 +301,25 @@ Then, an $1$-nearest neighbor classifier is constructed based on loadings $\{\ha
 
 
 \subsection{Real Data Experiment: Predict Composite Creativity Index}
-In this experiment, we consider predicting individual composite creativity index (CCI) through functional magnetic resonance imaging. Neuroimaging and creativity have been jointly investigated previously \cite{arden2010neuroimaging}. Most of studies utilize a statistical testing method and find CCI significant related or inversely related to the activity of some regions of brain. We embrace a different approach by directly building a prediction model for CCI. First, we jointly embed brain images of all subjects. Then, we construct a linear regression model by treating the estimated loadings as explanatory variables and CCI as response variable. \\
+In this experiment, we study predicting individual composite creativity index (CCI) through brain connectomes which are obtained by Multimodal Magnetic Resonance Imaging \cite{koutra2013d}. Neuroimaging and creativity have been jointly investigated previously \cite{arden2010neuroimaging}. Most of studies utilize a statistical testing method and find CCI significantly related or inversely related to the activity of some regions of the brain. We embrace a different approach by directly building a prediction model for CCI. First, we jointly embed brain images of all subjects. Then, we construct a linear regression model by treating the estimated loadings as explanatory variables and CCI as response variable. \\
 
-\noindent $113$ healthy, young adult subjects were scanned using  scanner with functional magnetic resonance imaging. The image is then registered by Desikan atlas \cite{desikan2006automated} and a graph of 70 vertices is constructed through computing pairwise correlations across regions. The graphs constructed are weighted; however, it doesn't stop us using our joint embedding procedure. One example of a graph is shown in the top panel of figure \ref{fig:cci1}. DT measures were scored by  independent judges using the Consensual Assessment Technique \cite{amabile1983social}, from which the CCI was derived. To predict the CCI, we jointly embed $113$ graphs with $d=10$. We then fit a linear model by regressing CCI on $\hat{\lambda}_i$, that is
+\noindent In total, $113$ healthy, young adult subjects were scanned using Siemens TrioTim scanner. The image is then registered by Desikan-Killiany Atlas \cite{desikan2006automated}, and a graph of 70 vertices is constructed. The graphs derived have weighted edges; however, it doesn't stop us applying our joint embedding procedure. One example of a graph is shown in the top panel of figure \ref{fig:cci1}. For each subject, a divergent thinking measure is scored by independent judges using the Consensual Assessment Technique \cite{amabile1983social}, from which the CCI is derived. To predict the CCI, we first jointly embed $113$ graphs with $d=10$, and then fit a linear model by regressing CCI on $\hat{\lambda}_i$, that is
 \[CCI_i \sim \beta_0+\lambda_i^T\beta + \epsilon_i. \]
-Next, we test the statistical significance of this model when compared to the null model with only intercept. \\
+Next, we assess the statistical significance of this model by comparing to the null model with only intercept. \\
 
-\noindent If only $\hat{\lambda}_i[1]$ is used as predictor, the top panel of figure \ref{fig:cci} shows the result. We can see a significant positive linear relationship between CCI and the first dimensional loadings. Since the first dimensional loadings usually captures the overall connectivity of graphs, this suggests that individual tends to be more creative when there are more brain connectivity. The R-square of this model is $0.07248$ and the model is statistically significant better when compared to the null model with a p-value $0.0039$. If fit CCI to all the loadings, a summary of the linear model is provided in appendix. The R-square is $0.2325$ and the model is statistically significant better than the null model with a p-value $0.0018$. Although there is still a positive relationship between CCI and the first dimensional loadings, it is no longer significant due to including more explanatory variables. There is a significant negative relationship between CCI and $\hat{\lambda}_i[6]$ as shown in the model summary. The scatter plot of CCI against $\hat{\lambda}_i[6]$ is given in the bottom panel of figure \ref{fig:cci}. We look into the rank one matrix $\hat{h}_6^T\hat{h}_6$ which is shown in the bottom panel of figure \ref{fig:cci1}. It has positive  connectivity within each half of brain, but negative  connectivity across half brains. This suggests that individual tends to be more creative when there are more across half brains connectivity than within half brains connectivity.
+\noindent If only $\hat{\lambda}_i[1]$ is used as explanatory variable, the top panel of figure \ref{fig:cci} shows the result. We can see a significant positive linear relationship between CCI and the first dimensional loadings. The first dimensional loadings generally captures the overall connectivity of graphs. In our case, the correlation between the first dimensional loadings and the sum of edge weights is around $0.98$. This model implies that individual tends to be more creative when there is more brain connectivity. The R-square of this model is $0.07248$, and the model is statistically significant better when compared to the null model with a p-value $0.0039$. If fit CCI to all the $10$ dimensional loadings, a summary of the linear model is provided in appendix and a scatter plot of fitted CCI versus true CCI is provided in the bottom panel of \ref{fig:cci}. The R-square is $0.2325$ and the model is statistically significant better than the null model with a p-value $0.0018$. It is also significantly better than the model with only $\hat{\lambda}_i[1]$. Although there is still a positive relationship between CCI and the first dimensional loadings, it is no longer significant due to including more explanatory variables. In this model, there is a significant negative relationship between CCI and $\hat{\lambda}_i[6]$ based on the t-test. The scatter plot of CCI against $\hat{\lambda}_i[6]$ is given in the middle panel of figure \ref{fig:cci}. We look into the rank one matrix $\hat{h}_6^T\hat{h}_6$ which is shown in the bottom panel of figure \ref{fig:cci1}. It has positive connectivity within each hemisphere of the brain, but negative connectivity across hemispheres. This suggests that compared to within-hemisphere connectivity, across-hemisphere connectivity tends to have a more positive impact on the human creativity. 
 
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[width=3.0in]{cci_data.png}
-	\caption{The top panel shows the graph derived from a typical subject. There are much more neural connectivity within each half of the brain. The bottom panel shows the rank one matrix $\hat{h}_6^T\hat{h}_6$, which has positive  connectivity within each half of brain, but negative  connectivity across half brains.  }
+	\caption{The top panel shows the graph derived from a typical subject. There is much more neural connectivity within each hemisphere. The bottom panel shows the rank one matrix $\hat{h}_6^T\hat{h}_6$, which has positive  connectivity within each hemisphere, but negative  connectivity across hemispheres.  }
 	\label{fig:cci1}
 \end{figure} 
 
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[scale=0.6,width=3.0in]{cci.png}
-	\caption{The top panel shows the scatter plot of CCI against $\hat{\lambda}_i[1]$ with regression line. There is a positive relationship between CCI and first dimensional loadings. The bottom panel shows the scatter plot of CCI against $\hat{\lambda}_i[6]$. There is a positive relationship between CCI and sixth dimensional loadings. }
+	\caption{The top panel shows the scatter plot of CCI against $\hat{\lambda}_i[1]$ with the regression line. There is a positive relationship between CCI and first dimensional loadings. The middle panel shows the scatter plot of CCI against $\hat{\lambda}_i[6]$ with regression line. There is a positive relationship between CCI and sixth dimensional loadings. The bottom panel shows the predicted CCI versus true CCI with the identity line.}
 	\label{fig:cci}
 \end{figure}
 
@@ -329,13 +327,11 @@ Next, we test the statistical significance of this model when compared to the nu
 
 \section{conclusion}
 In summary, we develop a joint embedding method which can simultaneously embed multiple graphs into low dimensional space. Joint embedding can
-be used to estimate simple and intuitive statistics for inference problems on multiple vertex matched graphs. Learning on multiple graphs has significant applications in diverse fields and our results have both theoretical and practical implications for the problem. As the real data experiment illustrate, joint embedding is a practically viable inference procedure. \\
+be used to estimate simple and intuitive statistics for inference problems on multiple vertex matched graphs. Learning on multiple graphs has significant applications in diverse fields and our results have both theoretical and practical implications for the problem. As the real data experiment illustrate, joint embedding is a practically viable inference procedure. We also propose a Multiple Random Eigen Graphs model. It can be seen as a generalization of Random Dot Product Graph model or Stochastic Block Model for multiple random graphs. We analyze the performance of joint embedding on this model under simple settings. It can be shown our method provides estimates with bounded error. Our approach is intimately related other matrix factorization approaches like singular value decomposition and tensor factorization. Indeed, we all try to estimate a low dimensional representation of high dimensional objects. We are currently investigating joint embedding with more or less regularizations on parameters and under different set ups. We are optimistic that our method provides a viable tool for analyzing multiple graphs and can contribute to a deeper understanding of the structure of networks.
 
-\noindent We also propose a Multiple Random Eigen Graphs model. It can be seen as a generalization of random dot product graph model or stochastic block model for multiple random graphs. We analyze the performance of joint embedding on this model under simple settings. It can be shown our method provides estimates with bounded error. \\
 
-\noindent Our approach is intimately related other matrix factorization approaches like singular value decomposition and tensor factorization. Indeed, they all try to estimate a low dimensional representation of high dimensional objects. We are currently investigate joint embedding with more or less regularizations on parameters under difference real set ups.  
-
-\appendix
+%\appendix
+\section*{Appendix A}
 \begin{proof} [Proof of Theorem 4.1]
 First,  we are going to show that $|D_n(h,h_1)-D(h,h_1)|$ converges uniformly to $0$.
 We notice three facts,
@@ -434,7 +430,8 @@ The first part of proof is showing that $h'$ is the eigenvector corresponds to t
 	\[\|h'-h_1\| \leq \frac{2 E(\lambda_i)}{E(\lambda_i^2)(h_1^T h')^2}. \]
 \end{proof}
 
-\noindent{\bf CCI Linear Model Summary}
+\section*{Appendix B}
+\noindent{\bf Linear Regression Model Summary}
 \begin{lstlisting}
 > model<-lm(cci~Lambda+1)
 > summary(model)
