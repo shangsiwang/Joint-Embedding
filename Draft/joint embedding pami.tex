@@ -15,6 +15,8 @@
 \usepackage{bbm}
 \usepackage{listings}
 \usepackage{ragged2e}
+\usepackage{caption}
+\captionsetup[figure]{labelfont={bf},labelformat={default},name={Figure}}
 
 
 
@@ -37,7 +39,6 @@
 	\vrule height0.75em width0.5em depth0.25em\fi}
 
 
-\hyphenation{op-tical net-works semi-conduc-tor}
 \begin{document}
 \title{Joint Embedding of Graphs}
 \author{Shangsi Wang,
@@ -91,9 +92,9 @@ Denote by $B \in [0,1]^{K \times K}$ the block connectivity probability matrix. 
 Then, we say $A$ is an adjacency matrix of a K-block stochastic block model graph, and we write $A \sim SBM(\pi,B)$. We may also treat $\tau$ as the parameter of interest, in this case we write $A \sim SBM(\tau,B)$.
 \end{definition}
 
-\noindent SBM is a widely used model to study community structure of a graph\cite{karrer2011stochastic}\cite{lyzinski2015community}. Next, we recall the notion of a random dot product graph\cite{young2007random}. 
+\noindent SBM generalizes Erdos-Renyi model\cite{erdds1959random}, and is a widely used model to study community structure of a graph\cite{karrer2011stochastic}\cite{lyzinski2015community}. Next, we recall the notion of a random dot product graph\cite{young2007random}. 
 
-\begin{definition} (Random Dot Product Graph (RDPG)) Let $F$ be a distribution on a set $\mathcal{X} \in \mathbb{R}^d$ satisfying $x^T y \in [0, 1]$ for all $x, y \in \mathcal{X}$. Let $X=[X_1^T,X_2^T,...,X_n^T] \in \mathbb{R}^{n \times d}$. We say $(X,A) \sim RDPG(F)$, if the $X_i$ are independent and identically distributed according to $F$, and conditioned on $X$, the $A_{ij}$ are independent Bernoulli random variables,
+\begin{definition} (Random Dot Product Graph (RDPG)) Let $F$ be a distribution on a set $\mathcal{X} \in \mathbb{R}^d$ satisfying $x^T y \in [0, 1]$ for all $x, y \in \mathcal{X}$. Let $X=[X_1^T,X_2^T,...,X_n^T] \in \mathcal{X}^n$. We say $(X,A) \sim RDPG(F)$, if the $X_i$ are independent and identically distributed according to $F$, and conditioned on $X$, the $A_{ij}$ are independent Bernoulli random variables,
 \[ A_{st} \sim Bernoulli(X_s^T X_t). \]
 Alternatively,
 \[ P(A|X) = \prod_{s<t} X_s^T X_t ^{ A_{st}} (1-X_s^T X_t)^{1- A_{st}}.\]
@@ -101,16 +102,21 @@ Also, we define $P:=XX^T$ to be edge probability matrix. When we are more intere
 \end{definition}
 The random dot product graph model is a convenient model which is designed to capture more complex structures than SBM. The adjacency
 spectral embedding of its adjacency matrix is well studied\cite{sussman2014consistent}. SBM and RDPG are models for a single graph. We propose a model for multiple random graphs which generalizes SBM and RDPG.
-\begin{definition} (Multiple Random Eigen Graphs (MREG)) Let $\{h_k\}_{k=1}^{d}$ be a set of norm-1 vectors in $\mathbb{R}^{n}$, and  $F$ be a distribution on a set $\mathcal{X} \in \mathbb{R}^d$,  satisfying $\sum\limits_{k=1}^{d} \lambda [k] h_k  h_k^T \  \in [0, 1]^{n \times n} $ for all $\lambda \in \mathcal{X}$, where $\lambda[k]$ is the $k$th entry of vector $\lambda$. We say $(\lambda_i,A_i)$ follows a $m$-graph $d$-dimensional multiple random eigen graphs model and write
-\[\{(\lambda_i,A_i)\}_{i=1}^{m} \sim MREG(F,h_1,...,h_d)\]
-if the $\lambda_i$ are independent and identically distributed according to $F$, and conditioned on $\lambda_i$, the entries of $A_i$ are independent Bernoulli random variables,
+\begin{definition} (Multiple Random Eigen Graphs (MREG)) Let $\{h_k\}_{k=1}^{d}$ be a set of norm-1 vectors in $\mathbb{R}^{n}$, and  $F$ be a distribution on a set $\mathcal{X} \in \mathbb{R}^d$,  satisfying $\sum\limits_{k=1}^{d} \lambda [k] h_k  h_k^T \  \in [0, 1]^{n \times n} $ for all $\lambda \in \mathcal{X}$, where $\lambda[k]$ is the $k$th entry of vector $\lambda$. We say $(\lambda_i,A_i)$ follows a $d$-dimensional multiple random eigen graphs model and write
+\[(\lambda_i,A_i) \overset{i.i.d.}{\sim} MREG(F,h_1,...,h_d)\]
+if the $\lambda_i$ has distribution $F$, and conditioned on $\lambda_i$, the entries of $A_i$ are independent Bernoulli random variables,
 \[ A_{i}[s,t] \sim Bernoulli( \sum_{k=1}^{d} \lambda_{i}[k] h_{k} [s] h_{k} [t] ). \]
-We call $P_i:=\sum_{k=1}^{d} \lambda_i [k] h_k  h_k^T$ the edge probability matrix for graph $i$. In cases that we are more interested in $\{\lambda_i\}_{i=1}^m$, we treat them as parameters and write 
+We call $P_i:=\sum_{k=1}^{d} \lambda_i [k] h_k  h_k^T$ the edge probability matrix for graph $i$. In cases that we are more interested in $\{\lambda_i\}_{i=1}^m$, we treat them as parameters and say $\{A_i\}_{i=1}^{m}$ follows a $m$-graph $d$-dimensional multiple random eigen graphs model with the notation:
 \[\{A_i\}_{i=1}^{m} \sim MREG(\lambda_1,...,\lambda_m,h_1,...,h_d).\] 
 \end{definition}
 
-
-\noindent In MREG, we allow self loops to happen. This is mainly for theoretical convenience. If we ignore the self loops, we have the following relationships between three random graph models. If an adjacency matrix $A \sim SBM(\pi,B)$ and the block connectivity matrix $B$ is positive semi-definite, $A$ can also be written as a $RDPG(F)$ with $F$ being a finite mixture of point masses. If an adjacency matrix $A \sim RDPG(X)$, then it is also a $1$-graph $MREG(\lambda_1,h_1,...,h_d)$ with $h_k$ being the normalized $k$th column of $X$ and $\lambda_1$ being the vector containing the squared norms of columns of $X$. However, a $1$-graph $MREG(\lambda_1,h_1,...,h_d)$ is not necessarily an RDPG graph since $\lambda_1$ could contain negative entries which may result in an indefinite edge probability matrix. If $m$ RDPG graphs have edge probability matrices sharing the same eigenspace, they also follow a $m$-graph MREG model. 
+\noindent Compared to the other two models, MREG is designed to model multiple graphs. In MREG, we allow self loops to happen. This is mainly for theoretical convenience. If we ignore the self loops and consider only $1$ graph, we have the relationship between three random graph models defined above and Erdos-Renyi (ER) model provided in figure \ref{fig:ven}. If an adjacency matrix $A \sim SBM(\pi,B)$ and the block connectivity matrix $B$ is positive semi-definite, $A$ can also be written as a $RDPG(F)$ with $F$ being a finite mixture of point masses. If an adjacency matrix $A \sim RDPG(X)$, then it is also a $1$-graph $MREG(\lambda_1,h_1,...,h_d)$ with $h_k$ being the normalized $k$th column of $X$ and $\lambda_1$ being the vector containing the squared norms of columns of $X$. However, a $1$-graph $MREG(\lambda_1,h_1,...,h_d)$ is not necessarily an RDPG graph since $\lambda_1$ could contain negative entries which may result in an indefinite edge probability matrix. If there are $m$ RDPG graphs with edge probability matrices sharing the same eigenspace, they follow a $m$-graph MREG model. 
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[scale=0.6,width=3.0in]{ven_diag.png}
+	\caption{Relationship between random graph models on $1$ graph. ER is a $1$-block SBM. If a graph follows SBM with positive semi-definite edge probability matrix, it also follows RDPG model. Any SBM and RDPG graph can be represented by a $d$-dimensional MREG model with $d$ being less than or equal to the number of block or dimension of RDPG. On one graph, inhomogeneous ER and $n$-dimensional MREG are equivalent.}
+	\label{fig:ven}
+\end{figure}
 
 \section{Methodology}
 \subsection{Joint Embedding of Graphs}
@@ -157,11 +163,11 @@ Let $f(\Lambda_{*k_0},h_{k_0})$ denote the sum on the left hand side of the equa
 \end{equation}
 The derivative of the objective function with respect to $\Lambda_{i k_0}$ is given by
 \[\frac{\partial f}{\partial \Lambda_{i k_0}}= -2 \langle R_{ik}-\Lambda_{ik_0} h_{k_0} h_{k_0}^T,h_{k_0} h_{k_0}^T\rangle.\]
-Setting the derivative to $0$ yields,
+Setting the derivative to $0$ yields
 \begin{equation}  \label{eq:4}
-\hat{\Lambda}_{i k_0} = \langle R_{ik}, h_{k_0} h_{k_0}^T \rangle.
+\hat{\Lambda}_{i k_0} = \langle R_{ik}, h_{k_0} h_{k_0}^T \rangle,
 \end{equation}
-Algorithm 1 describes the general procedure to compute the $d$-dimensional joint embedding of graphs $\{G_i\}_{i=1}^m$. 
+where $\langle \cdot , \cdot \rangle$ denotes the inner product. Algorithm 1 describes the general procedure to compute the $d$-dimensional joint embedding of graphs $\{G_i\}_{i=1}^m$. 
 \begin{algorithm}
 	\caption{Joint Embedding Algorithm}
 	\begin{algorithmic}[1]
@@ -297,7 +303,7 @@ We let the class label $Y_i$ indicate which point mass $\lambda_i$ is sampled fr
 \end{figure}
 Then, a $1$-nearest neighbor classifier is constructed based on loadings $\{\hat{\lambda}_i\}_{i=1}^m$. The $1$-NN classification error with $200$ graphs is $0$. \\
 \\
-\noindent We compare classification performance using joint embedding and Laplacian Eigenmap \cite{belkin2003laplacian}. For Laplacian Eigenmap, we first embed each normalized Laplacian matrix and then compute Frobenious norm between embeddings. We also apply a $1$-NN rule to classify graphs. We let the number of graphs $m$ increase from $4$ to $200$. For each value of $m$, we repeat the simulation $100$ times. The result is shown in Figure \ref{fig:acc}. We see joint embedding takes advantage of increasing sample size and dominates Laplacian Eigenmap at all values of $m$. 
+\noindent We compare classification performance using joint embedding and Laplacian Eigenmap \cite{belkin2003laplacian}. For Laplacian Eigenmap, we first embed each normalized Laplacian matrix and then compute Procrustes distance between embeddings. We also apply a $1$-NN rule to classify graphs. We let the number of graphs $m$ increase from $4$ to $200$. For each value of $m$, we repeat the simulation $100$ times. The result is shown in Figure \ref{fig:acc}. We see joint embedding takes advantage of increasing sample size and dominates Laplacian Eigenmap at all values of $m$. 
 \begin{figure}[!htbp]
 	\centering
 	\includegraphics[scale=0.6,width=3.0in]{leig_je_acc.png}
@@ -329,10 +335,9 @@ Next, we assess the statistical significance of this model by comparing to the n
 \end{figure}
 
 
-
 \section{conclusion}
 In summary, we develop a joint embedding method which can simultaneously embed multiple graphs into low dimensional space. Joint embedding can
-be used to estimate features for inference problems on multiple vertex matched graphs. Learning on multiple graphs has significant applications in diverse fields and our results have both theoretical and practical implications for the problem. As the real data experiment illustrates, joint embedding is a practically viable inference procedure. We also propose a Multiple Random Eigen Graphs model. It can be seen as a generalization of Random Dot Product Graph model or Stochastic Block Model for multiple random graphs. We analyze the performance of joint embedding on this model under simple settings. We show the joint embedding method provides estimates with bounded error. Our approach is intimately related to other matrix factorization approaches such as singular value decomposition and tensor factorization. Indeed, we all try to estimate a low dimensional representation of high dimensional objects. We are currently investigating joint embedding with more or less regularizations on parameters and under different set ups. We are optimistic that our method provides a viable tool for analyzing multiple graphs and can contribute to a deeper understanding of the joint structure of networks.
+be used to estimate features for inference problems on multiple vertex matched graphs. Learning on multiple graphs has significant applications in diverse fields and our results have both theoretical and practical implications for the problem. As the real data experiment illustrates, joint embedding is a practically viable inference procedure. We also propose a Multiple Random Eigen Graphs model. It can be understood as a generalization of Random Dot Product Graph model or Stochastic Block Model for multiple random graphs. We analyze the performance of joint embedding on this model under simple settings. We show the joint embedding method provides estimates with bounded error. Our approach is intimately related to other matrix and tensor factorization approaches such as singular value decomposition and CP decomposition. Indeed, the joint embedding and these algorithms all try to estimate a low dimensional representation of high dimensional objects. We are currently investigating the joint embedding with more or less regularizations on parameters and under different set ups. We are optimistic that our method provides a viable tool for analyzing multiple graphs and can contribute to a deeper understanding of the joint structure of networks.
 
 
 %\appendix
