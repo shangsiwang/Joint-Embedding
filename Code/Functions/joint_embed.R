@@ -1,17 +1,32 @@
-# n<-1000
+# Author: Shangsi Wang
+# The main function is multidembed which calculates joint embedding of graphs.
+#
+# The inputs are: 
+# two distance matrices A, d;
+# A is a list of graphs
+# d is the number of dimensions to embed.
+#
+# The outputs are 
+# objectives after each dimension
+# lambda is m by d which contains estimated loadings for each graph
+# h is n by d which contains estimated latent positions for vertices
+# iter contains iterations takes for each dimension to converge
+#
+# An example is provided below which embeds 10 100*100 graphs
+#
+# n<-100
 # m<-10
 # A<-list()
 # for (i in 1:m){
 # Ai<-matrix(runif(n^2,0,1),n,n)
-# A[[i]]<-(Ai+t(Ai))/2
+# A[[i]]<-(Ai+t(Ai))/2 
 # }
-# result1<-multidembed(A,3,50)
-# result2<-multidembed(A,d=3,maxiter=50,innitialize=3)
+# result<-multidembed(A,3,50)
 
 
-
-onedembed <- function(A,maxiter=20) {
-	##Innitialize
+# function which perform embedding into 1 dimension
+onedembed <- function(A,maxiter=20,Innitialize=1) {
+	# initialize
 	m<-length(A)
 	n<-dim(A[[1]])[1]
 	result<-list("objective" = 0,"lambda" =0,"h" =0,"iter"=0)
@@ -19,8 +34,21 @@ onedembed <- function(A,maxiter=20) {
 	for(i in 1:m){
 		Abar<-Abar+A[[i]]
 	}
+	
+	# default svd initialization
 	s<-svd(Abar,1,1)
-	h<-sqrt(s$d[1])*s$u
+	h<-sqrt(s$d[1])*s$u 
+	
+	# random initialize
+	if(sum(abs(h))==0) {Innitialize =2}
+	if (length(Innitialize)==1 && Innitialize==2){
+	  h <- as.matrix(rnorm(n))
+	}
+	
+	# user input iniliatialization
+	if(length(Innitialize)>1){
+	  h <- as.matrix(Innitialize)
+	}
 	h<-h/norm(h,type="F")
 	H<-h%*%t(h)
 	Hnorm<-norm(H,type="F")^2
@@ -32,23 +60,24 @@ onedembed <- function(A,maxiter=20) {
 	obj<-cptobj(A,lambda,h)
 	objstart<-obj
 	objpre<-Inf
-
-
 	iter<-0
 	while(iter<maxiter & ((objpre-obj)>(10^-7)*(1+objstart))){
 		iter<-iter+1
-		##Iterate update
+		# Gradient descent
+		# Compute gradient of h
 		Gradiant<-matrix(0,n,1)
 		for(i in 1:m){
 			Gradiant<-Gradiant-A[[i]]%*%h*lambda[i]*4+h*lambda[i]^2*4
 		}
 		Gradiant<-Gradiant/m
-		Gnorm<-norm(Gradiant)
-
+		Gnorm<-norm(Gradiant,type="F")
+		#print(Gnorm)
+		
 		obj<-cptobj(A,lambda,h)
 		stepsize<-1
 		objtmp<-Inf
 		while(objtmp>obj-stepsize*Gnorm^2*0.01 & stepsize>10^-7 ){
+		  # backtracking line search 
 			ht<-h-Gradiant*stepsize
 			htnorm<-norm(ht,type="F")
 			ht<-ht/htnorm
@@ -65,12 +94,14 @@ onedembed <- function(A,maxiter=20) {
 			h<-ht
 			H<-Ht
 			Hnorm<-norm(H,type="F")^2
+			# update lambda
 			for(i in 1:m){
 				lambda[i]<-1/(Hnorm)*sum(sum(H*A[[i]]))
 			}
 		}
 	}
 	obj<-cptobj(A,lambda,h)
+	
 	result$objective<-obj
 	result$lambda<-lambda
 	result$h<-h
@@ -81,13 +112,20 @@ onedembed <- function(A,maxiter=20) {
 
 
 
-multidembed <- function(A,d,maxiter=20) {
+multidembed <- function(A,d,maxiter=20,Innitialize=1) {
 	m<-length(A)
 	n<-dim(A[[1]])[1]
 	result<-list("objective" =rep(0,d),"lambda" =matrix(0,m,d),"h" =matrix(0,n,d),"iter"=rep(0,d))
 	Resid<-A
 	for(k in 1:d){
-		resultd<-onedembed(Resid,maxiter)
+	  if(length(Innitialize)==1 && Innitialize==1){
+		  resultd<-onedembed(Resid,maxiter,Innitialize=1)
+	  } else if (length(Innitialize)==1 && Innitialize==2){
+	    resultd<-onedembed(Resid,maxiter,Innitialize=2)
+	  }
+	    else{
+	    resultd<-onedembed(Resid,maxiter,Innitialize[,k])
+	  }
 		result$objective[k]=resultd$objective
 		result$iter[k]=resultd$iter
 		result$lambda[,k]=resultd$lambda
@@ -101,7 +139,7 @@ multidembed <- function(A,d,maxiter=20) {
 
 
 
-
+# function which computes the objective function
 cptobj <- function(A,lambda,h) {
 	m<-length(A)
 	obj<-0

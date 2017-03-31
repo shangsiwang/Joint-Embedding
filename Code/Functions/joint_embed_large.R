@@ -1,15 +1,17 @@
-#n<-20
-#m<-10
-#A<-list()
-#for (i in 1:m){
-#Ai<-matrix(runif(n^2,0,1),n,n)
-#A[[i]]<-(Ai+t(Ai))/2
-#}
-#result1<-onedembed(A,innitialize=1)
-#result2<-onedembed(A,innitialize=2)
-#result3<-onedembed(A,innitialize=3)
-#result4<-multidembed(A,d=2,innitialize=1)
-                     
+# n<-20
+# m<-10
+# A<-list()
+# for (i in 1:m){
+# Ai<-matrix(runif(n^2,0,1),n,n)
+# A[[i]]<-(Ai+t(Ai))/2
+# }
+# #result1<-onedembed(A,innitialize=1)
+# #result2<-onedembed(A,innitialize=2)
+# #result3<-onedembed(A,innitialize=3)
+# result1<-multidembed(A,d=2,innitialize=1)
+# result2<-multidembed(A,d=2,innitialize=2)
+# result3<-multidembed(A,d=2,innitialize=3)
+# result4<-multidembed(A,d=2)                 
 
 
 # return (Ai- \sum lambdaprevi hprevi hprevi^T) %*% h
@@ -29,8 +31,8 @@ if(is.null(hprevi)) {
 }
 
 
-
-onedembed <- function(A,maxiter=20,hprev=NULL,lambdaprev=NULL,innitialize=3) {
+#Embed one dimension
+onedembed <- function(A,maxiter=100,hprev=NULL,lambdaprev=NULL,innitialize=3, k0 = 1) {
 	##Innitialize
 	m<-length(A)
 	n<-dim(A[[1]])[1]
@@ -38,30 +40,19 @@ onedembed <- function(A,maxiter=20,hprev=NULL,lambdaprev=NULL,innitialize=3) {
 
 	if(innitialize==1){
 	Abar<-matrix(0,n,n)
-	if(is.null(hprev)){
 	for(i in 1:m){
 		Abar<-Abar+A[[i]]
 	}
-	s<-svd(Abar,1,1)
-	h<-s$u
-	} else {
-	  ###should perform svd on residual matrix
-	  h<-matrix(rnorm(n),n,1)+1
-	}
+	s<-svd(Abar,k0,k0)
+	h<-s$u[,k0]
 	}	else if(innitialize==2) {
-	  if(is.null(hprev)){
-	s<-svd(A[[1]],1,1)
-	h<-s$u
-	  } else {
-	    ###should perform svd on residual matrix
-	    s<-svd(A[[1]],2,2)
-	    h<-matrix(s$u[,2],n,1)
-	  }
+	  s<-svd(A[[1]],k0,k0)
+	  h<-s$u[,k0]
 	} else if(innitialize==3) {
-	  h<-matrix(rnorm(n),n,1)+1
+	  h<-matrix(1,n,1)
 	}
 	
-	h<-h/norm(h,type="F")
+	h<-as.matrix(h)/norm(as.matrix(h),type="F")
 	lambda<-rep(0,m)
 	for(i in 1:m){
 		lambda[i]<-t(h)%*% resiMultiply(A[[i]],h,hprevi=hprev,lambdaprevi=lambdaprev[i,])
@@ -86,7 +77,7 @@ onedembed <- function(A,maxiter=20,hprev=NULL,lambdaprev=NULL,innitialize=3) {
 		obj<-cptobjprev(A,lambda,h,hprev,lambdaprev)
 		stepsize<-1
 		objtmp<-Inf
-		while(objtmp>obj-stepsize*Gnorm^2*0.01 & stepsize>10^-7 ){
+		while(objtmp>obj-stepsize*Gnorm^2*0.0001 & stepsize>10^-7 ){
 			ht<-h-Gradiant*stepsize
 			htnorm<-norm(ht,type="F")
 			ht<-ht/htnorm
@@ -117,17 +108,17 @@ onedembed <- function(A,maxiter=20,hprev=NULL,lambdaprev=NULL,innitialize=3) {
 
 
 
-
-multidembed <- function(A,d,maxiter=20,innitialize=3) {
+##Embed multidimension
+multidembed <- function(A,d,maxiter=100,innitialize=3) {
 	m<-length(A)
 	n<-dim(A[[1]])[1]
 	result<-list("objective" =rep(0,d),"lambda" =matrix(0,m,d),"h" =matrix(0,n,d),"iter"=rep(0,d))
 	Resid<-A
 	for(k in 1:d){
 	  if(k==1){
-		resultd<-onedembed(A,maxiter=maxiter,hprev=NULL,lambdaprev=NULL,innitialize=innitialize)
+		resultd<-onedembed(A,maxiter=maxiter,hprev=NULL,lambdaprev=NULL,innitialize=innitialize,k0=k)
 	  } else {
-	  resultd<-onedembed(A,maxiter=maxiter,as.matrix(result$h[,1:(k-1)]),as.matrix(result$lambda[,1:(k-1)]),innitialize)
+	  resultd<-onedembed(A,maxiter=maxiter,as.matrix(result$h[,1:(k-1)]),as.matrix(result$lambda[,1:(k-1)]),innitialize,k0=k)
 	  }
 		result$objective[k]=resultd$objective
 		result$iter[k]=resultd$iter
